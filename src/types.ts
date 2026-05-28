@@ -11,6 +11,9 @@ export interface Hoarding {
   last_paid_date: string | null;
   next_due_date: string | null;
   notes: string | null;
+  latitude?: string;
+  longitude?: string;
+  is_owned?: boolean;
   created_at?: string;
   image_url?: string;
 }

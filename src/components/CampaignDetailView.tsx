@@ -160,7 +160,7 @@ export default function CampaignDetailView({ campaign, onClose, onDelete }: Camp
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-900 line-clamp-1">{hoarding.location}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{hoarding.width}×{hoarding.height} ft • {hoarding.rent_status}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{hoarding.width}×{hoarding.height} ft • {hoarding.is_owned ? 'Owned' : hoarding.rent_status}</p>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />

@@ -70,6 +70,9 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
     last_paid_date: '',
     next_due_date: '',
     notes: '',
+    latitude: '',
+    longitude: '',
+    is_owned: false,
     image_url: '',
   });
 
@@ -127,6 +130,9 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
         last_paid_date: '',
         next_due_date: '',
         notes: '',
+        latitude: '',
+        longitude: '',
+        is_owned: false,
         image_url: '',
       });
     }
@@ -347,6 +353,29 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Latitude</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 12.9716"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                        value={formData.latitude || ''}
+                        onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Longitude</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 77.5946"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                        value={formData.longitude || ''}
+                        onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Width (ft)</label>
                       <div className="relative">
                         <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -374,20 +403,51 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Rent Amount (Monthly)</label>
-                    <input
-                      required
-                      type="number"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
-                      value={formData.rent_amount}
-                      onChange={(e) => setFormData({ ...formData, rent_amount: Number(e.target.value) })}
-                    />
-                  </div>
+                  {!formData.is_owned && (
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Rent Amount (Monthly)</label>
+                      <input
+                        required
+                        type="number"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                        value={formData.rent_amount}
+                        onChange={(e) => setFormData({ ...formData, rent_amount: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Owner & Rent Status */}
                 <div className="space-y-6">
+                  {/* Toggle Own Asset */}
+                  <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-4">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">Own Hoarding Asset</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Agency-owned billboard</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.is_owned || false} 
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData(prev => ({
+                            ...prev,
+                            is_owned: checked,
+                            owner_name: checked ? 'SS Advertisers' : (prev.owner_name === 'SS Advertisers' ? '' : prev.owner_name),
+                            rent_amount: checked ? 0 : prev.rent_amount,
+                            rent_status: checked ? 'Paid' : prev.rent_status,
+                            last_paid_date: checked ? '' : prev.last_paid_date,
+                            next_due_date: checked ? '' : prev.next_due_date,
+                            contact_number: checked ? 'N/A (Agency Owned)' : (prev.contact_number === 'N/A (Agency Owned)' ? '' : prev.contact_number),
+                          }));
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Owner Name</label>
                     <div className="relative">
@@ -395,7 +455,11 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                       <input
                         required
                         type="text"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                        disabled={formData.is_owned}
+                        className={cn(
+                          "w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium",
+                          formData.is_owned && "opacity-60 bg-slate-100 cursor-not-allowed"
+                        )}
                         value={formData.owner_name}
                         onChange={(e) => setFormData({ ...formData, owner_name: e.target.value })}
                       />
@@ -405,53 +469,61 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
                     <input
-                      required
+                      required={!formData.is_owned}
                       type="text"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                      disabled={formData.is_owned}
+                      className={cn(
+                        "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium",
+                        formData.is_owned && "opacity-60 bg-slate-100 cursor-not-allowed"
+                      )}
                       value={formData.contact_number}
                       onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Rent Payment Status</label>
-                    <div className="grid grid-cols-2 gap-2">
-                       {rentStatusOptions.map(opt => (
-                         <button 
-                           key={opt}
-                           type="button"
-                           onClick={() => setFormData({ ...formData, rent_status: opt })}
-                           className={cn(
-                             "py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all",
-                             formData.rent_status === opt 
-                               ? "bg-slate-900 text-white border-slate-900 shadow-sm shadow-slate-200" 
-                               : "text-slate-400 border-slate-200 hover:border-slate-300 hover:text-indigo-600"
-                           )}
-                         >
-                           {opt}
-                         </button>
-                       ))}
+                  {!formData.is_owned && (
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Rent Payment Status</label>
+                      <div className="grid grid-cols-2 gap-2">
+                         {rentStatusOptions.map(opt => (
+                           <button 
+                             key={opt}
+                             type="button"
+                             onClick={() => setFormData({ ...formData, rent_status: opt })}
+                             className={cn(
+                               "py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest border transition-all",
+                               formData.rent_status === opt 
+                                 ? "bg-slate-900 text-white border-slate-900 shadow-sm shadow-slate-200" 
+                                 : "text-slate-400 border-slate-200 hover:border-slate-300 hover:text-indigo-600"
+                             )}
+                           >
+                             {opt}
+                           </button>
+                         ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Last Paid Date</label>
-                  <CustomDatePicker
-                    selected={formData.last_paid_date ? parseISO(formData.last_paid_date) : null}
-                    onChange={(date) => setFormData({ ...formData, last_paid_date: date ? format(date, 'yyyy-MM-dd') : '' })}
-                  />
+              {!formData.is_owned && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Last Paid Date</label>
+                    <CustomDatePicker
+                      selected={formData.last_paid_date ? parseISO(formData.last_paid_date) : null}
+                      onChange={(date) => setFormData({ ...formData, last_paid_date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Next Due Date</label>
+                    <CustomDatePicker
+                      selected={formData.next_due_date ? parseISO(formData.next_due_date) : null}
+                      onChange={(date) => setFormData({ ...formData, next_due_date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Next Due Date</label>
-                  <CustomDatePicker
-                    selected={formData.next_due_date ? parseISO(formData.next_due_date) : null}
-                    onChange={(date) => setFormData({ ...formData, next_due_date: date ? format(date, 'yyyy-MM-dd') : '' })}
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="space-y-1.5 pt-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
@@ -466,7 +538,7 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                 />
               </div>
 
-              <div className="flex gap-4 pt-4 sticky bottom-0 bg-white">
+              <div className="flex gap-4 pt-6 mt-4 border-t border-slate-100">
                 {hoarding && onDelete && (
                   <button
                     type="button"

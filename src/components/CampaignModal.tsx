@@ -236,9 +236,17 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
                             )}>
                               <MapPin className="w-4 h-4" />
                             </div>
-                            <div className="pr-4">
+                            <div className="pr-4 flex flex-col gap-0.5">
                               <p className={cn("text-xs font-bold truncate max-w-[200px]", isSelected ? "text-slate-900" : "text-slate-900")}>{site.location}</p>
-                              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{site.width}×{site.height} ft</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{site.width}×{site.height} ft</p>
+                                {site.latitude && site.longitude && (
+                                  <>
+                                    <span className="text-slate-300">•</span>
+                                    <p className="text-[9px] text-indigo-500 font-bold uppercase tracking-widest">{site.latitude}, {site.longitude}</p>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {isSelected && <Check className="w-4 h-4 text-slate-900" />}

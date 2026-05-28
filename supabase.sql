@@ -11,6 +11,9 @@ CREATE TABLE hoardings (
     last_paid_date DATE,
     next_due_date DATE,
     notes TEXT,
+    latitude TEXT,
+    longitude TEXT,
+    is_owned BOOLEAN DEFAULT FALSE,
     image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

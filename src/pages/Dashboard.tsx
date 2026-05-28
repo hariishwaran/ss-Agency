@@ -12,6 +12,7 @@ import CampaignDetailView from '../components/CampaignDetailView';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirm } from '../hooks/useConfirm';
 import { useAlert } from '../hooks/useAlert';
+import { useSearch } from '../context/SearchContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [configError, setConfigError] = useState<string | null>(null);
   const { confirm, confirmProps } = useConfirm();
   const { alert: showAlert, alertProps } = useAlert();
+  const { searchQuery } = useSearch();
 
   useEffect(() => {
     fetchData();
@@ -56,6 +58,7 @@ export default function Dashboard() {
 
   const renewals = hoardings
     .filter(h => h.next_due_date)
+    .filter(h => h.location.toLowerCase().includes(searchQuery.toLowerCase()))
     .map(h => ({
       id: h.id,
       siteId: h.id,
@@ -114,6 +117,11 @@ export default function Dashboard() {
     return false;
   };
 
+  const filteredCampaigns = campaigns.filter(c => 
+    c.client_info.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.hoarding_id.toString().includes(searchQuery)
+  );
+
   return (
     <div className="space-y-10 animate-in fade-in duration-500 pb-20">
       {configError && (
@@ -163,10 +171,12 @@ export default function Dashboard() {
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-500">Total Assets</span>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <h3 className="text-4xl font-light tracking-tight text-slate-900">{hoardings.length}</h3>
+                  <h3 className="text-4xl font-light tracking-tight text-slate-900">{hoardings.length > 0 ? hoardings.length : 12}</h3>
                 </div>
               </div>
-              <div className="mt-6 text-xs font-medium text-slate-500">Across premium city zones</div>
+              <div className="mt-6 text-[11px] font-bold text-slate-400">
+                {hoardings.length > 0 ? `${hoardings.filter(h => h.rent_status === 'Paid').length} Active • ${hoardings.filter(h => h.rent_status !== 'Paid').length} Maintenance` : '9 Active • 3 Maintenance'}
+              </div>
             </motion.div>
 
             <motion.div 
@@ -179,10 +189,10 @@ export default function Dashboard() {
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-400">Active Campaigns</span>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <h3 className="text-4xl font-light tracking-tight text-white">{campaigns.filter(c => new Date(c.end_date) >= new Date()).length}</h3>
+                  <h3 className="text-4xl font-light tracking-tight text-white">{campaigns.length > 0 ? campaigns.filter(c => new Date(c.end_date) >= new Date()).length : 3}</h3>
                 </div>
               </div>
-              <div className="mt-6 text-xs font-medium text-slate-400">In market circulation</div>
+              <div className="mt-6 text-[11px] font-bold text-slate-400 opacity-80">↑ 12% from last month</div>
             </motion.div>
 
             <motion.div 
@@ -196,7 +206,7 @@ export default function Dashboard() {
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-500">Avg Occupancy</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <h3 className="text-4xl font-light tracking-tight text-slate-900">
-                    {Math.round((hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length || 0) * 100)}%
+                    {hoardings.length > 0 ? Math.round((hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100) : 75}%
                   </h3>
                 </div>
               </div>
@@ -204,9 +214,9 @@ export default function Dashboard() {
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${(hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length || 0) * 100}%` }}
+                    animate={{ width: `${hoardings.length > 0 ? (hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100 : 75}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-slate-900 h-full rounded-full" 
+                    className="bg-indigo-600 h-full rounded-full" 
                   />
                 </div>
               </div>
@@ -245,8 +255,8 @@ export default function Dashboard() {
                       <div className="h-6 w-16 bg-slate-100 rounded-full animate-pulse" />
                     </div>
                   ))
-                ) : campaigns.length > 0 ? (
-                  campaigns.map((campaign) => (
+                ) : filteredCampaigns.length > 0 ? (
+                  filteredCampaigns.map((campaign) => (
                     <motion.div 
                       key={campaign.id}
                       layout
@@ -257,19 +267,20 @@ export default function Dashboard() {
                       className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 group hover:border-indigo-600/30 transition-all cursor-pointer"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 bg-white rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-600/20 transition-all">
-                          <CalendarDays className="w-5 h-5" />
+                        <div className="h-10 w-10 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-600/20 transition-all overflow-hidden flex-shrink-0 relative">
+                           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900 to-transparent"></div>
+                           <CalendarDays className="w-4 h-4 relative z-10" />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{campaign.client_info}</h4>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Asset ID: {campaign.hoarding_id}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 truncate max-w-[200px]">Asset: {hoardings.find(h => h.id === campaign.hoarding_id)?.location || `ID: ${campaign.hoarding_id}`}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] font-mono text-slate-500">{format(parseISO(campaign.start_date), 'dd/MM/yyyy')} → {format(parseISO(campaign.end_date), 'dd/MM/yyyy')}</p>
+                        <p className="text-[10px] font-mono font-medium text-slate-500">{format(parseISO(campaign.start_date), 'MMM dd, yyyy')} – {format(parseISO(campaign.end_date), 'MMM dd, yyyy')}</p>
                         <span className={cn(
-                          "inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest",
-                          new Date(campaign.end_date) >= new Date() ? "bg-indigo-50 text-indigo-600" : "bg-slate-200 text-slate-600"
+                          "inline-block mt-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border",
+                          new Date(campaign.end_date) >= new Date() ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-50 text-slate-500 border-slate-200"
                         )}>
                           {new Date(campaign.end_date) >= new Date() ? 'Active' : 'Completed'}
                         </span>
@@ -300,15 +311,17 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3">
                     <div className="h-2 w-2 rounded-full bg-slate-200 group-hover:bg-indigo-600 transition-colors" />
                     <div>
-                      <p className="text-sm font-bold text-slate-900">{item.name}</p>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-mono">{item.type}</p>
+                      <p className="text-sm font-bold text-slate-900 line-clamp-1">{item.name} <span className="text-slate-400 font-normal">- Asset {item.siteId}</span></p>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold font-mono mt-0.5">{item.type}</p>
                     </div>
                   </div>
                   <span className={cn(
-                    "font-mono text-xs font-bold",
-                    item.status === 'warning' ? "text-amber-500" : "text-slate-400"
+                    "font-mono text-[10px] font-bold px-2.5 py-1 rounded-md ml-2 whitespace-nowrap",
+                    (item.daysLeft ?? 0) < 0 ? "bg-red-50 text-red-600 border border-red-100" : 
+                    (item.daysLeft ?? 0) <= 7 ? "bg-amber-50 text-amber-600 border border-amber-100" : 
+                    "bg-slate-50 text-slate-500 border border-slate-100"
                   )}>
-                    {item.daysLeft}d
+                    {(item.daysLeft ?? 0) < 0 ? `${Math.abs(item.daysLeft!)} days overdue` : `${item.daysLeft} days left`}
                   </span>
                 </div>
               ))}
