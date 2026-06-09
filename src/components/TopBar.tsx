@@ -1,4 +1,4 @@
-import { Bell, Search, User as UserIcon } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { useSearch } from '../context/SearchContext';

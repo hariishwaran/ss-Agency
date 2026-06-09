@@ -1,8 +1,8 @@
-import { Filter, Plus, MapPin, Camera, AlertCircle, Edit3, Trash2, Loader2, Circle, Smartphone, FileDown, User, Calendar, X } from 'lucide-react';
+import { Plus, MapPin, Camera, AlertCircle, Edit3, Smartphone, FileDown, FileText, Calendar, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { exportToExcel, exportToPDF } from '../utils/export';
+import { exportToExcel, exportToPPT } from '../utils/export';
 import { CustomDatePicker } from '../components/ui/DatePicker';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '../utils/cn';
 import { Hoarding, Campaign } from '../types';
@@ -22,12 +22,59 @@ export default function Inventory() {
   const [hoardingsList, setHoardingsList] = useState<Hoarding[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [, setDeletingId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'available' | 'occupied'>('all');
   const [searchDate, setSearchDate] = useState<Date | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string>('all');
+
+  const availableCities = useMemo(() => {
+    const cities = new Set<string>();
+    hoardingsList.forEach(h => {
+      if (h.city && h.city.trim() !== '') {
+        cities.add(h.city.trim());
+      } else {
+        cities.add('Chennai'); // default fallback
+      }
+    });
+    return Array.from(cities).sort();
+  }, [hoardingsList]);
+
   const { searchQuery } = useSearch();
   const { confirm, confirmProps } = useConfirm();
   const { alert: showAlert, alertProps } = useAlert();
+
+  const EXCEL_FIELDS = useMemo(() => [
+    { id: 'id', label: 'ID' },
+    { id: 'location', label: 'Location' },
+    { id: 'city', label: 'City' },
+    { id: 'size', label: 'Size (Dimensions)' },
+    { id: 'owner_name', label: 'Owner Name' },
+    { id: 'contact_number', label: 'Primary Contact' },
+    { id: 'rent_amount', label: 'Monthly Rent' },
+    { id: 'rent_status', label: 'Rent Status' },
+    { id: 'last_paid_date', label: 'Last Paid Date' },
+    { id: 'next_due_date', label: 'Next Due Date' },
+    { id: 'latitude', label: 'Latitude' },
+    { id: 'longitude', label: 'Longitude' },
+    { id: 'notes', label: 'Compliance Notes' },
+  ], []);
+
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [selectedExcelFields, setSelectedExcelFields] = useState<Record<string, boolean>>({
+    id: true,
+    location: true,
+    city: true,
+    size: true,
+    owner_name: true,
+    contact_number: true,
+    rent_amount: true,
+    rent_status: true,
+    last_paid_date: true,
+    next_due_date: true,
+    latitude: false,
+    longitude: false,
+    notes: false,
+  });
 
   useEffect(() => {
     fetchData();
@@ -47,31 +94,6 @@ export default function Inventory() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getStatusColor = (hoarding: Hoarding) => {
-    const now = new Date();
-    
-    // Check Rent
-    if (!hoarding.is_owned && hoarding.rent_status === 'Pending' && hoarding.next_due_date) {
-      const dueDate = new Date(hoarding.next_due_date);
-      const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (diffDays <= 3) return 'bg-red-500 shadow-red-200';
-      if (diffDays <= 7) return 'bg-amber-500 shadow-amber-200';
-    }
-
-    // Check Campaigns
-    const siteCampaigns = campaigns.filter(c => c.hoarding_id === hoarding.id);
-    const activeCampaign = siteCampaigns.find(c => new Date(c.start_date) <= now && new Date(c.end_date) >= now);
-    
-    if (activeCampaign) {
-      const endDate = new Date(activeCampaign.end_date);
-      const diffDays = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (diffDays <= 3) return 'bg-red-500 shadow-red-200';
-      if (diffDays <= 7) return 'bg-amber-500 shadow-amber-200';
-    }
-
-    return 'bg-emerald-500 shadow-emerald-200';
   };
 
   const handleProceed = () => {
@@ -114,6 +136,7 @@ export default function Inventory() {
   };
 
   const handleSaveHoarding = async (savedHoarding: any) => {
+    console.log('Saving hoarding', { editing: editingHoarding?.id, data: savedHoarding });
     try {
       if (editingHoarding) {
         await hoardingService.update(editingHoarding.id, savedHoarding);
@@ -123,8 +146,13 @@ export default function Inventory() {
       setIsModalOpen(false);
       setEditingHoarding(null);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving hoarding:', error);
+      await showAlert({
+        title: 'Save Failed',
+        message: error.message || 'Could not save hoarding details.',
+        variant: 'danger'
+      });
     }
   };
 
@@ -154,36 +182,66 @@ export default function Inventory() {
       });
     }
 
+    if (selectedCity !== 'all') {
+      filtered = filtered.filter(h => {
+        const hoardingCity = h.city ? h.city.trim().toLowerCase() : 'chennai';
+        return hoardingCity === selectedCity.toLowerCase();
+      });
+    }
+
     return filtered;
-  }, [hoardingsList, campaigns, searchQuery, filter, searchDate]);
+  }, [hoardingsList, campaigns, searchQuery, filter, searchDate, selectedCity]);
 
   const handleExportExcel = () => {
-    const data = filteredHoardings.map(h => ({
-      ID: h.id,
-      Location: h.location,
-      Size: `${h.width} x ${h.height} ft`,
-      Owner: h.is_owned ? 'SS Advertisers (Agency)' : h.owner_name,
-      Contact: h.is_owned ? 'N/A' : h.contact_number,
-      Rent: h.is_owned ? 0 : h.rent_amount,
-      Status: h.is_owned ? 'Owned' : h.rent_status,
-      'Last Paid': h.is_owned ? 'N/A' : h.last_paid_date,
-      'Next Due': h.is_owned ? 'N/A' : h.next_due_date
-    }));
-    exportToExcel(data, 'Hoardings_Inventory');
+    setShowExcelModal(true);
   };
 
-  const handleExportPDF = () => {
-    const headers = ['ID', 'Location', 'Size', 'Owner', 'Contact', 'Rent', 'Status'];
-    const data = filteredHoardings.map(h => [
-      h.id,
-      h.location,
-      `${h.width} x ${h.height} ft`,
-      h.is_owned ? 'SS Advertisers' : h.owner_name,
-      h.is_owned ? 'N/A' : h.contact_number,
-      h.is_owned ? '0 (Owned)' : h.rent_amount,
-      h.is_owned ? 'Owned' : h.rent_status
-    ]);
-    exportToPDF(headers, data, 'Hoardings_Inventory', 'Hoardings Inventory List');
+  const triggerExcelExport = () => {
+    const activeFields = Object.keys(selectedExcelFields).filter(k => selectedExcelFields[k]);
+    if (activeFields.length === 0) {
+      showAlert({
+        title: "No columns selected",
+        message: "Please select at least one column to export."
+      });
+      return;
+    }
+
+    const data = filteredHoardings.map(h => {
+      const row: Record<string, any> = {};
+      if (selectedExcelFields.id) row['ID'] = h.id;
+      if (selectedExcelFields.location) row['Location'] = h.location;
+      if (selectedExcelFields.city) row['City'] = h.city || 'Chennai';
+      if (selectedExcelFields.size) row['Size'] = `${h.width} x ${h.height} ft`;
+      if (selectedExcelFields.owner_name) row['Owner'] = h.is_owned ? 'SS Advertisers (Agency)' : h.owner_name;
+      if (selectedExcelFields.contact_number) row['Contact'] = h.is_owned ? 'N/A' : h.contact_number;
+      if (selectedExcelFields.rent_amount) row['Rent'] = h.is_owned ? 0 : h.rent_amount;
+      if (selectedExcelFields.rent_status) row['Status'] = h.is_owned ? 'Owned' : h.rent_status;
+      if (selectedExcelFields.last_paid_date) row['Last Paid'] = h.is_owned ? 'N/A' : h.last_paid_date;
+      if (selectedExcelFields.next_due_date) row['Next Due'] = h.is_owned ? 'N/A' : h.next_due_date;
+      if (selectedExcelFields.latitude) row['Latitude'] = h.latitude ?? 'N/A';
+      if (selectedExcelFields.longitude) row['Longitude'] = h.longitude ?? 'N/A';
+      if (selectedExcelFields.notes) row['Compliance Notes'] = h.notes ?? 'N/A';
+      return row;
+    });
+
+    exportToExcel(data, 'Hoardings_Inventory');
+    setShowExcelModal(false);
+  };
+
+  const handleExportPPT = () => {
+    const slides = filteredHoardings.map(h => ({
+      imageUrl: h.image_url || '',
+      location: h.location,
+      city: h.city,
+      dimensions: `${h.width}×${h.height} ft`,
+      clientInfo: h.is_owned ? 'SS Advertisers (Owned Asset)' : h.owner_name,
+      startDate: '',
+      endDate: '',
+      status: h.is_owned ? 'owned' : h.rent_status === 'Paid' ? 'active' : 'past',
+      poStatus: undefined,
+      hoardingId: h.id,
+    }));
+    exportToPPT(slides, 'Inventory_Presentation');
   };
 
   return (
@@ -210,6 +268,28 @@ export default function Inventory() {
 
         {/* Right: Date picker + Export + New Site */}
         <div className="flex flex-wrap items-center gap-3">
+
+          {/* City Filter — modern inline dropdown */}
+          <div className="relative flex items-center">
+            <div className="absolute left-3 pointer-events-none text-slate-400">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <select
+              value={selectedCity}
+              onChange={e => setSelectedCity(e.target.value)}
+              className="pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold tracking-wide shadow-sm hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none appearance-none cursor-pointer"
+            >
+              <option value="all">All Cities</option>
+              {availableCities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+            <div className="absolute right-3 pointer-events-none text-slate-400 flex items-center justify-center">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
 
           {/* Date Picker — modern inline */}
           <div className="relative flex items-center">
@@ -243,12 +323,12 @@ export default function Inventory() {
             <span className="hidden sm:inline">Excel</span>
           </button>
           <button
-            onClick={handleExportPDF}
+            onClick={handleExportPPT}
             className="p-3 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 transition-all font-bold text-xs uppercase tracking-widest flex items-center gap-1.5 shadow-sm"
-            title="Export PDF"
+            title="Export PowerPoint"
           >
-            <Smartphone className="w-4 h-4" />
-            <span className="hidden sm:inline">PDF</span>
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">PPT</span>
           </button>
 
           <button 
@@ -369,7 +449,7 @@ export default function Inventory() {
                   {/* Bottom gradient overlay with location name */}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-16">
                     <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">
-                      {hoarding.location.split(' ').slice(0, 2).join(' ').toUpperCase()}
+                      {(hoarding.city || 'Chennai').toUpperCase()}
                     </p>
                     <h3 className="text-lg font-bold text-white leading-tight line-clamp-1">
                       {hoarding.location}
@@ -377,39 +457,16 @@ export default function Inventory() {
                   </div>
                 </div>
 
-                {/* Details Section — 2×2 grid matching campaign cards */}
+                {/* Details Section — public info only */}
                 <div className="p-5 flex-1">
                   <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Size</p>
-                      <p className="text-sm font-bold text-slate-800">{hoarding.width} × {hoarding.height} ft</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rent</p>
-                      <p className="text-sm font-bold text-slate-800">
-                        {hoarding.is_owned ? 'Owned' : `₹${(hoarding.rent_amount || 0).toLocaleString('en-IN')}`}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact</p>
-                      <p className="text-sm font-bold text-slate-800">
-                        {hoarding.is_owned ? 'SS Support' : hoarding.contact_number}
-                      </p>
-                    </div>
-{/* Status */}
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</p>
                       <p className="text-sm font-bold text-slate-800">{isOccupied ? 'Occupied' : 'Available'}</p>
                     </div>
-                    {/* Latitude */}
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Latitude</p>
-                      <p className="text-sm font-bold text-slate-800">{hoarding.latitude ?? 'N/A'}</p>
-                    </div>
-                    {/* Longitude */}
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Longitude</p>
-                      <p className="text-sm font-bold text-slate-800">{hoarding.longitude ?? 'N/A'}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</p>
+                      <p className="text-sm font-bold text-slate-800">{hoarding.city || 'Chennai'}</p>
                     </div>
                   </div>
                 </div>
@@ -503,6 +560,117 @@ export default function Inventory() {
                   className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all"
                 >
                   Proceed
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showExcelModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowExcelModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200"
+            >
+              <div className="p-8 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Customize Excel Export</h3>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">
+                      Choose which data columns to include in your spreadsheet.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setShowExcelModal(false)}
+                    className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => {
+                      const updated = { ...selectedExcelFields };
+                      EXCEL_FIELDS.forEach(f => { updated[f.id] = true; });
+                      setSelectedExcelFields(updated);
+                    }}
+                    className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 transition"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-slate-300">|</span>
+                  <button
+                    onClick={() => {
+                      const updated = { ...selectedExcelFields };
+                      EXCEL_FIELDS.forEach(f => { updated[f.id] = false; });
+                      setSelectedExcelFields(updated);
+                    }}
+                    className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 transition"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                  {EXCEL_FIELDS.map(field => {
+                    const isSelected = selectedExcelFields[field.id];
+                    return (
+                      <button
+                        key={field.id}
+                        onClick={() => setSelectedExcelFields(prev => ({
+                          ...prev,
+                          [field.id]: !prev[field.id]
+                        }))}
+                        className={cn(
+                          "flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all hover:bg-slate-50/80",
+                          isSelected 
+                            ? "bg-indigo-50/40 border-indigo-200/80 shadow-sm" 
+                            : "bg-white border-slate-150"
+                        )}
+                      >
+                        <span className={cn(
+                          "text-xs font-bold transition-all",
+                          isSelected ? "text-indigo-950 font-extrabold" : "text-slate-700"
+                        )}>
+                          {field.label}
+                        </span>
+                        <div className={cn(
+                          "w-5 h-5 rounded-lg border flex items-center justify-center transition-all",
+                          isSelected 
+                            ? "bg-indigo-600 border-indigo-600 text-white" 
+                            : "border-slate-300 bg-white"
+                        )}>
+                          {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="p-8 bg-slate-50/50 border-t border-slate-100 flex gap-4">
+                <button
+                  onClick={() => setShowExcelModal(false)}
+                  className="flex-1 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={triggerExcelExport}
+                  className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/10 hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <FileDown className="w-4 h-4" /> Download Excel
                 </button>
               </div>
             </motion.div>

@@ -1,6 +1,6 @@
-import { X, Calendar, User, Type, PlayCircle, MapPin, Check, FileText, Clock, Loader2, Trash2 } from 'lucide-react';
+import { X, Calendar, User, MapPin, Check, FileText, Clock, Loader2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Campaign, Hoarding } from '../types';
 import { CustomDatePicker } from './ui/DatePicker';
 import { format, parseISO } from 'date-fns';

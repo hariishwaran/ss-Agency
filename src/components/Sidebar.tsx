@@ -2,17 +2,18 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
-  Info, 
   Wallet, 
   Settings, 
   HelpCircle,
-  BarChart3
+  BarChart3,
+  Printer
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Package, label: 'Inventory', path: '/inventory' },
+  { icon: Printer, label: 'Flex Printing', path: '/flex-printing' },
   { icon: BarChart3, label: 'Campaigns', path: '/campaigns' },
   { icon: Wallet, label: 'Ledger', path: '/ledger' },
 ];
@@ -27,7 +28,7 @@ export default function Sidebar() {
     <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col py-8 px-4 gap-2 z-50">
       <div className="mb-8 px-4">
         <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none whitespace-nowrap">SS ADVERTISERS</h1>
+          <img src="/SS%20LOGO%20.jpg.jpeg" alt="SS Advertisers" className="h-16 w-auto" />
         </div>
         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-2">Hoarding management</p>
       </div>

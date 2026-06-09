@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { AppNotification, Hoarding, Campaign } from '../types';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { AppNotification } from '../types';
 import { hoardingService } from '../services/hoardingService';
 import { campaignService } from '../services/campaignService';
 

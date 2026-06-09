@@ -1,6 +1,6 @@
-import { ArrowUpRight, Plus, CalendarDays, Filter, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, Plus, CalendarDays, Filter, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import { Campaign, Hoarding } from '../types';

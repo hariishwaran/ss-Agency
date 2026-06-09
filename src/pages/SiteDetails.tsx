@@ -1,9 +1,7 @@
-import { ArrowLeft, MapPin, Handshake, Info, Shield, PlusCircle, Lightbulb, Send, TrendingUp, ChevronRight, Edit3, Trash2, Camera, MoreHorizontal, Loader2, Maximize } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Shield, PlusCircle, ChevronRight, Trash2, Loader2, Maximize } from 'lucide-react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
-import BookingCalendar from '../components/BookingCalendar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Hoarding } from '../types';
 import { hoardingService } from '../services/hoardingService';
@@ -33,6 +31,7 @@ export default function SiteDetails() {
     message: '',
     onConfirm: () => {},
   });
+  const [showSensitive, setShowSensitive] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -191,28 +190,6 @@ export default function SiteDetails() {
 
   const dynamicOccupancyRate = Math.min(100, Math.round((bookedDaysInYear / 365) * 100));
 
-  // Gantt chart column calculator helper
-  const getGanttSpan = (startDate: Date, endDate: Date) => {
-    const startMonth = startDate.getMonth(); // Jan = 0
-    const endMonth = endDate.getMonth();
-    
-    // April (Month 3) to August (Month 7)
-    let startCol = 1;
-    if (startMonth === 4) startCol = 3;      // May
-    else if (startMonth === 5) startCol = 6; // June
-    else if (startMonth === 6) startCol = 8; // July
-    else if (startMonth >= 7) startCol = 10; // August
-
-    let endCol = 12;
-    if (endMonth <= 3) endCol = 2;          // April
-    else if (endMonth === 4) endCol = 5;    // May
-    else if (endMonth === 5) endCol = 7;    // June
-    else if (endMonth === 6) endCol = 9;    // July
-    
-    const span = Math.max(2, endCol - startCol + 1);
-    return { startCol, span };
-  };
-
   return (
     <div className="space-y-12 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -292,8 +269,8 @@ export default function SiteDetails() {
           {/* Left Specs & Compliance */}
           <div className="lg:col-span-2 space-y-8 pr-0 lg:pr-8 border-r-0 lg:border-r border-slate-200/60 flex flex-col justify-between">
             <div>
-              {/* Specs Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+              {/* Specs Grid — public fields only */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dimensions</p>
                   <p className="font-bold text-lg text-slate-900 leading-tight">
@@ -307,15 +284,9 @@ export default function SiteDetails() {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Owner</p>
-                  <p className="font-bold text-lg text-slate-900 truncate leading-tight">
-                    {hoarding.is_owned ? 'SS Advertisers' : hoarding.owner_name}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Contact</p>
-                  <p className="font-bold text-lg text-indigo-600 hover:text-indigo-800 transition-colors truncate leading-tight font-mono">
-                    {hoarding.is_owned ? '+91 98400 01234' : hoarding.contact_number}
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</p>
+                  <p className="font-bold text-lg text-slate-900 leading-tight">
+                    {hoarding.city || 'Chennai'}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -328,6 +299,39 @@ export default function SiteDetails() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Longitude</p>
                   <p className="font-bold text-lg text-slate-900 leading-tight">
                     {hoarding.longitude ?? 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Confidential Details — single row with toggle */}
+            <div className="p-5 bg-slate-50/50 border border-slate-200/40 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-extrabold text-slate-700 tracking-wider uppercase">Confidential Details</h4>
+                <button
+                  onClick={() => setShowSensitive(prev => !prev)}
+                  className="px-3 py-1.5 bg-indigo-100 text-indigo-800 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-200 transition"
+                >
+                  {showSensitive ? 'Hide Details' : 'Show Details'}
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Owner</p>
+                  <p className={`font-bold text-lg text-slate-900 truncate leading-tight ${!showSensitive ? 'blurred' : ''}`}>
+                    {hoarding.is_owned ? 'SS Advertisers' : hoarding.owner_name}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Contact</p>
+                  <p className={`font-bold text-lg text-indigo-600 truncate leading-tight font-mono ${!showSensitive ? 'blurred' : ''}`}>
+                    {hoarding.is_owned ? '+91 98400 01234' : hoarding.contact_number}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Monthly Rent</p>
+                  <p className={`font-extrabold text-lg text-slate-900 tracking-tight ${!showSensitive ? 'blurred' : ''}`}>
+                    {hoarding.is_owned ? '₹0' : `₹${(hoarding.rent_amount || 0).toLocaleString('en-IN')}`}
                   </p>
                 </div>
               </div>
@@ -350,14 +354,6 @@ export default function SiteDetails() {
           {/* Right Financials */}
           <div className="lg:col-span-1 pl-0 lg:pl-4 space-y-6 flex flex-col justify-between">
             <div className="space-y-6">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Financials</p>
-                <p className="text-xs font-semibold text-slate-500 mt-2">Monthly Yield</p>
-                <p className="font-extrabold text-4xl text-slate-900 tracking-tight mt-1">
-                  {hoarding.is_owned ? '₹0' : `₹${(hoarding.rent_amount || 0).toLocaleString('en-IN')}`}
-                </p>
-              </div>
-              
               <div className="border-t border-slate-200/60 pt-6 space-y-4">
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span className="text-slate-500">Settlement Cycle</span>
@@ -365,10 +361,24 @@ export default function SiteDetails() {
                 </div>
                 <div className="flex justify-between items-center text-sm font-semibold">
                   <span className="text-slate-500">Next Payout</span>
-                  <span className="text-slate-950 font-bold">
+                  <span className={cn("text-slate-950 font-bold", !showSensitive && "blurred")}>
                     {hoarding.next_due_date ? format(parseISO(hoarding.next_due_date), 'dd MMM yyyy') : '05 May 2024'}
                   </span>
                 </div>
+                {!hoarding.is_owned && (
+                  <>
+                    <div className="flex justify-between items-center text-sm font-semibold">
+                      <span className="text-slate-500">Rent Status</span>
+                      <span className={cn("text-slate-950 font-bold", !showSensitive && "blurred")}>{hoarding.rent_status}</span>
+                    </div>
+                    {hoarding.last_paid_date && (
+                      <div className="flex justify-between items-center text-sm font-semibold">
+                        <span className="text-slate-500">Last Paid</span>
+                        <span className={cn("text-slate-950 font-bold", !showSensitive && "blurred")}>{format(parseISO(hoarding.last_paid_date), 'dd MMM yyyy')}</span>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 

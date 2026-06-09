@@ -1,4 +1,4 @@
-import { X, Calendar, User, MapPin, BarChart3, Clock, ChevronRight, FileText, Loader2, Trash2 } from 'lucide-react';
+import { X, Calendar, User, MapPin, ChevronRight, FileText, Loader2, Trash2, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';

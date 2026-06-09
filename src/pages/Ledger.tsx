@@ -1,16 +1,17 @@
-import { Filter, Search, Download, ChevronRight, Wallet, Banknote, Calendar, ArrowLeft, Plus, Trash2, ExternalLink, Loader2, AlertCircle, Smartphone, Landmark, Receipt, CreditCard, Coins } from 'lucide-react';
+import { Download, Wallet, Banknote, Plus, Trash2, ExternalLink, Loader2, Smartphone, Landmark, Receipt, CreditCard, Coins } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNavigate, Link } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { CustomDatePicker } from '../components/ui/DatePicker';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../utils/cn';
-import { LedgerEntry, Hoarding } from '../types';
+import { LedgerEntry, Hoarding, Campaign } from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirm } from '../hooks/useConfirm';
 import { useAlert } from '../hooks/useAlert';
 import { ledgerService } from '../services/ledgerService';
 import { hoardingService } from '../services/hoardingService';
+import { campaignService } from '../services/campaignService';
 import { useSearch } from '../context/SearchContext';
 
 const getMethodIcon = (method: string) => {
@@ -27,6 +28,7 @@ export default function Ledger() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [hoardings, setHoardings] = useState<Record<number, Hoarding>>({});
+  const [campaigns, setCampaigns] = useState<Record<number, Campaign>>({});
   const [isLoading, setIsLoading] = useState(true);
   const { searchQuery } = useSearch();
   const { confirm, confirmProps } = useConfirm();
@@ -35,11 +37,15 @@ export default function Ledger() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newEntry, setNewEntry] = useState<Omit<LedgerEntry, 'id' | 'created_at'>>({
     hoarding_id: 0,
+    campaign_id: undefined,
+    po_id: undefined,
     amount_paid: 0,
     payment_date: new Date().toISOString().split('T')[0],
     period_covered: '',
     payment_method: 'UPI',
-    receipt_url: null
+    receipt_url: null,
+    transaction_type: 'other',
+    reference_number: undefined,
   });
 
   useEffect(() => {
@@ -49,9 +55,10 @@ export default function Ledger() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [ledgerData, hoardingData] = await Promise.all([
+      const [ledgerData, hoardingData, campaignData] = await Promise.all([
         ledgerService.getAll(),
-        hoardingService.getAll()
+        hoardingService.getAll(),
+        campaignService.getAll()
       ]);
       
       setEntries(ledgerData);
@@ -61,6 +68,12 @@ export default function Ledger() {
         hoardingMap[h.id] = h;
       });
       setHoardings(hoardingMap);
+
+      const campaignMap: Record<number, Campaign> = {};
+      campaignData.forEach(c => {
+        campaignMap[c.id] = c;
+      });
+      setCampaigns(campaignMap);
       
       if (hoardingData.length > 0 && newEntry.hoarding_id === 0) {
         setNewEntry(prev => ({ ...prev, hoarding_id: hoardingData[0].id }));
@@ -80,11 +93,15 @@ export default function Ledger() {
       fetchData();
       setNewEntry({
         hoarding_id: (Object.values(hoardings) as Hoarding[])[0]?.id || 0,
+        campaign_id: undefined,
+        po_id: undefined,
         amount_paid: 0,
         payment_date: new Date().toISOString().split('T')[0],
         period_covered: '',
         payment_method: 'UPI',
-        receipt_url: null
+        receipt_url: null,
+        transaction_type: 'other',
+        reference_number: undefined,
       });
     } catch (error: any) {
       console.error('Error adding entry:', error);
@@ -134,9 +151,12 @@ export default function Ledger() {
 
   const filteredEntries = entries.filter(entry => {
     const site = hoardings[entry.hoarding_id]?.location || '';
+    const campaignName = entry.campaign_id ? campaigns[entry.campaign_id]?.client_info || '' : '';
     return site.toLowerCase().includes(searchQuery.toLowerCase()) || 
            entry.period_covered.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           entry.payment_method.toLowerCase().includes(searchQuery.toLowerCase());
+           entry.payment_method.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           entry.transaction_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           campaignName.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const totalCollected = entries.reduce((sum, entry) => sum + entry.amount_paid, 0);
@@ -197,9 +217,11 @@ export default function Ledger() {
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment ID</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoarding Unit</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Campaign</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount Paid</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Method</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
@@ -244,9 +266,11 @@ export default function Ledger() {
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment ID</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoarding Unit</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Campaign</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount Paid</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Period</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Method</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
@@ -271,6 +295,18 @@ export default function Ledger() {
                       </div>
                     </td>
                     <td className="px-8 py-6">
+                      {entry.campaign_id ? (
+                        <div onClick={() => navigate(`/campaigns/${entry.campaign_id}`)} className="cursor-pointer group/campaign">
+                          <p className="text-xs font-bold text-slate-900 group-hover/campaign:text-indigo-600 transition-colors truncate max-w-[140px]">
+                            {campaigns[entry.campaign_id]?.client_info || 'Loading...'}
+                          </p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Campaign #{entry.campaign_id}</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs font-bold text-slate-400">—</p>
+                      )}
+                    </td>
+                    <td className="px-8 py-6">
                       <p className="text-lg font-black text-slate-900">₹ {entry.amount_paid.toLocaleString('en-IN')}</p>
                     </td>
                     <td className="px-8 py-6">
@@ -279,6 +315,11 @@ export default function Ledger() {
                     <td className="px-8 py-6">
                       <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-600 border border-slate-100">
                         {entry.period_covered}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={cn("px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border", entry.transaction_type === 'po_payment' ? "bg-indigo-50 text-indigo-700 border-indigo-100" : entry.transaction_type === 'rent' ? "bg-amber-50 text-amber-700 border-amber-100" : "bg-slate-50 text-slate-600 border-slate-100")}>
+                        {entry.transaction_type === 'po_payment' ? 'PO Payment' : entry.transaction_type}
                       </span>
                     </td>
                     <td className="px-8 py-6">
@@ -393,6 +434,34 @@ export default function Ledger() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Transaction Type</label>
+                    <select 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-indigo-600/5 outline-none font-bold"
+                      value={newEntry.transaction_type}
+                      onChange={(e) => setNewEntry({...newEntry, transaction_type: e.target.value as any})}
+                    >
+                      <option value="other">Other</option>
+                      <option value="rent">Rent</option>
+                      <option value="po_payment">PO Payment</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Linked Campaign</label>
+                    <select 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-indigo-600/5 outline-none font-bold"
+                      value={newEntry.campaign_id || ''}
+                      onChange={(e) => setNewEntry({...newEntry, campaign_id: e.target.value ? parseInt(e.target.value) : undefined})}
+                    >
+                      <option value="">None</option>
+                      {Object.values(campaigns).map(c => (
+                        <option key={c.id} value={c.id}>{c.client_info}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Date</label>
                     <CustomDatePicker
                       selected={newEntry.payment_date ? parseISO(newEntry.payment_date) : null}
@@ -436,6 +505,16 @@ export default function Ledger() {
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-indigo-600/5 outline-none font-bold"
                       value={newEntry.receipt_url || ''}
                       onChange={(e) => setNewEntry({...newEntry, receipt_url: e.target.value || null})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ref Number</label>
+                    <input 
+                      type="text"
+                      placeholder="UTR / Invoice #"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-4 focus:ring-indigo-600/5 outline-none font-bold"
+                      value={newEntry.reference_number || ''}
+                      onChange={(e) => setNewEntry({...newEntry, reference_number: e.target.value || undefined})}
                     />
                   </div>
                 </div>

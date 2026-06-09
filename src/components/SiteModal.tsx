@@ -1,4 +1,4 @@
-import { X, Camera, Upload, Trash2, MapPin, Ruler, User, Mail, FileText, Check, Scissors, Loader2 } from 'lucide-react';
+import { X, Camera, Upload, Trash2, MapPin, Ruler, User, FileText, Check, Scissors, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
@@ -61,6 +61,7 @@ const rentStatusOptions: Hoarding['rent_status'][] = ['Paid', 'Pending'];
 export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding }: SiteModalProps) {
   const [formData, setFormData] = useState<Partial<Hoarding>>({
     location: '',
+    city: '',
     width: 0,
     height: 0,
     owner_name: '',
@@ -121,6 +122,7 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
     } else {
       setFormData({
         location: '',
+        city: '',
         width: 0,
         height: 0,
         owner_name: '',
@@ -349,6 +351,18 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">City</label>
+                    <input
+                      required
+                      type="text"
+                      placeholder="e.g. Chennai, Bangalore, Mumbai"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                      value={formData.city || ''}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

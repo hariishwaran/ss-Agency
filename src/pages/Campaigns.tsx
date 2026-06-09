@@ -1,14 +1,14 @@
-import { Filter, Plus, Calendar, MapPin, Loader2, Clock, Trash2, Edit3, FileText, FileDown, MessageSquare, ArrowDownUp } from 'lucide-react';
+import { Plus, Calendar, MapPin, Loader2, Trash2, Edit3, FileText, FileDown, MessageSquare, ArrowDownUp, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { exportToExcel, exportToPDF } from '../utils/export';
-import { useState, useEffect } from 'react';
+import { exportToExcel, exportToPPT } from '../utils/export';
+import { useState, useEffect, useMemo } from 'react';
 import { Campaign, Hoarding } from '../types';
 import { campaignService } from '../services/campaignService';
 import { hoardingService } from '../services/hoardingService';
 import { calculateDays, isPast, isFuture } from '../utils/date';
 import { format, parseISO } from 'date-fns';
 import CampaignModal from '../components/CampaignModal';
-import BookingCalendar from '../components/BookingCalendar';
+
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useConfirm } from '../hooks/useConfirm';
 import { useAlert } from '../hooks/useAlert';
@@ -29,6 +29,41 @@ export default function Campaigns() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming' | 'past'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [showExcelModal, setShowExcelModal] = useState(false);
+
+  const CAMPAIGN_FIELDS = useMemo(() => [
+    { id: 'id', label: 'ID' },
+    { id: 'client', label: 'Client' },
+    { id: 'location', label: 'Location' },
+    { id: 'city', label: 'City' },
+    { id: 'hoarding_id', label: 'Hoarding ID' },
+    { id: 'start_date', label: 'Start Date' },
+    { id: 'end_date', label: 'End Date' },
+    { id: 'duration', label: 'Duration (Days)' },
+    { id: 'status', label: 'Status' },
+    { id: 'po_status', label: 'PO Status' },
+    { id: 'total_po_amount', label: 'Total PO Amount' },
+    { id: 'paid_po_amount', label: 'Paid PO Amount' },
+    { id: 'internal_notes', label: 'Internal Notes' },
+    { id: 'created_at', label: 'Created At' },
+  ], []);
+
+  const [selectedExcelFields, setSelectedExcelFields] = useState<Record<string, boolean>>({
+    id: true,
+    client: true,
+    location: true,
+    city: true,
+    hoarding_id: false,
+    start_date: true,
+    end_date: true,
+    duration: true,
+    status: true,
+    po_status: true,
+    total_po_amount: false,
+    paid_po_amount: false,
+    internal_notes: false,
+    created_at: false,
+  });
 
   useEffect(() => {
     fetchData();
@@ -140,29 +175,54 @@ export default function Campaigns() {
     });
 
   const handleExportExcel = () => {
-    const data = filteredCampaigns.map(c => ({
-      ID: c.id,
-      Client: c.client_info,
-      Location: hoardings[c.hoarding_id]?.location || 'N/A',
-      'Start Date': c.start_date,
-      'End Date': c.end_date,
-      Status: getStatus(c.start_date, c.end_date),
-      Notes: c.internal_notes || ''
-    }));
-    exportToExcel(data, 'Campaigns_List');
+    setShowExcelModal(true);
   };
 
-  const handleExportPDF = () => {
-    const headers = ['ID', 'Client', 'Location', 'Start Date', 'End Date', 'Status'];
-    const data = filteredCampaigns.map(c => [
-      c.id,
-      c.client_info,
-      hoardings[c.hoarding_id]?.location || 'N/A',
-      c.start_date,
-      c.end_date,
-      getStatus(c.start_date, c.end_date)
-    ]);
-    exportToPDF(headers, data, 'Campaigns_List', 'Campaigns List');
+  const triggerExcelExport = () => {
+    const activeFields = Object.keys(selectedExcelFields).filter(k => selectedExcelFields[k]);
+    if (activeFields.length === 0) {
+      showAlert({ title: "No columns selected", message: "Please select at least one column to export." });
+      return;
+    }
+
+    const data = filteredCampaigns.map(c => {
+      const site = hoardings[c.hoarding_id];
+      const row: Record<string, any> = {};
+      if (selectedExcelFields.id) row['ID'] = c.id;
+      if (selectedExcelFields.client) row['Client'] = c.client_info;
+      if (selectedExcelFields.location) row['Location'] = site?.location || 'N/A';
+      if (selectedExcelFields.city) row['City'] = site?.city || 'Chennai';
+      if (selectedExcelFields.hoarding_id) row['Hoarding ID'] = c.hoarding_id;
+      if (selectedExcelFields.start_date) row['Start Date'] = c.start_date;
+      if (selectedExcelFields.end_date) row['End Date'] = c.end_date;
+      if (selectedExcelFields.duration) row['Duration (Days)'] = calculateDays(c.start_date, c.end_date);
+      if (selectedExcelFields.status) row['Status'] = getStatus(c.start_date, c.end_date);
+      if (selectedExcelFields.po_status) row['PO Status'] = c.po_status || 'none';
+      if (selectedExcelFields.total_po_amount) row['Total PO Amount'] = c.total_po_amount || 0;
+      if (selectedExcelFields.paid_po_amount) row['Paid PO Amount'] = c.paid_po_amount || 0;
+      if (selectedExcelFields.internal_notes) row['Internal Notes'] = c.internal_notes || '';
+      if (selectedExcelFields.created_at) row['Created At'] = c.created_at || '';
+      return row;
+    });
+
+    exportToExcel(data, 'Campaigns_List');
+    setShowExcelModal(false);
+  };
+
+  const handleExportPPT = () => {
+    const slides = filteredCampaigns.map(c => ({
+      imageUrl: hoardings[c.hoarding_id]?.image_url || '',
+      location: hoardings[c.hoarding_id]?.location || 'Unknown',
+      city: hoardings[c.hoarding_id]?.city,
+      dimensions: `${hoardings[c.hoarding_id]?.width || '?'}×${hoardings[c.hoarding_id]?.height || '?'} ft`,
+      clientInfo: c.client_info,
+      startDate: format(parseISO(c.start_date), 'MMM dd, yyyy'),
+      endDate: format(parseISO(c.end_date), 'MMM dd, yyyy'),
+      status: getStatus(c.start_date, c.end_date),
+      poStatus: c.po_status,
+      hoardingId: c.hoarding_id,
+    }));
+    exportToPPT(slides, 'Campaigns_Presentation');
   };
 
   return (
@@ -185,13 +245,23 @@ export default function Campaigns() {
           ))}
         </div>
 
-        {/* Right: Filter + Sort + Launch */}
+        {/* Right: Export + Sort + Launch */}
         <div className="flex items-center gap-2">
           <button
+            onClick={handleExportExcel}
             className="px-4 py-2.5 bg-white text-slate-600 rounded-xl font-bold text-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+            title="Export Excel"
           >
-            <Filter className="w-3.5 h-3.5" />
-            Filters
+            <FileDown className="w-4 h-4" />
+            <span className="hidden sm:inline">Excel</span>
+          </button>
+          <button
+            onClick={handleExportPPT}
+            className="px-4 py-2.5 bg-white text-slate-600 rounded-xl font-bold text-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+            title="Export PowerPoint"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">PPT</span>
           </button>
           <button
             onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
@@ -263,7 +333,7 @@ export default function Campaigns() {
                     />
 
                     {/* Status Badge */}
-                    <div className="absolute top-4 left-4 z-10">
+                    <div className="absolute top-4 left-4 z-10 flex gap-2">
                       <div className={cn(
                         "px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest",
                         status === 'active' ? "bg-emerald-500 text-white" :
@@ -278,6 +348,16 @@ export default function Campaigns() {
                         )} />
                         {status}
                       </div>
+                      {campaign.po_status && campaign.po_status !== 'none' && (
+                        <div className={cn(
+                          "px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest",
+                          campaign.po_status === 'paid' ? "bg-emerald-500 text-white" :
+                          campaign.po_status === 'partial' ? "bg-amber-500 text-white" :
+                          "bg-slate-500 text-white"
+                        )}>
+                          PO: {campaign.po_status}
+                        </div>
+                      )}
                     </div>
 
                     {/* Bottom gradient overlay with campaign name */}
@@ -398,6 +478,62 @@ export default function Campaigns() {
 
       <ConfirmDialog {...confirmProps} />
       <ConfirmDialog {...alertProps} />
+
+      <AnimatePresence>
+        {showExcelModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowExcelModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200"
+            >
+              <div className="p-8 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Customize Excel Export</h3>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">Choose which data columns to include in your spreadsheet.</p>
+                  </div>
+                  <button onClick={() => setShowExcelModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-slate-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex gap-2 mb-6">
+                  <button onClick={() => { const u = { ...selectedExcelFields }; CAMPAIGN_FIELDS.forEach(f => { u[f.id] = true; }); setSelectedExcelFields(u); }} className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 transition">Select All</button>
+                  <span className="text-slate-300">|</span>
+                  <button onClick={() => { const u = { ...selectedExcelFields }; CAMPAIGN_FIELDS.forEach(f => { u[f.id] = false; }); setSelectedExcelFields(u); }} className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 transition">Deselect All</button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                  {CAMPAIGN_FIELDS.map(field => {
+                    const isSelected = selectedExcelFields[field.id];
+                    return (
+                      <button key={field.id} onClick={() => setSelectedExcelFields(prev => ({ ...prev, [field.id]: !prev[field.id] }))} className={cn("flex items-center justify-between p-3.5 rounded-2xl border text-left transition-all hover:bg-slate-50/80", isSelected ? "bg-indigo-50/40 border-indigo-200/80 shadow-sm" : "bg-white border-slate-150")}>
+                        <span className={cn("text-xs font-bold transition-all", isSelected ? "text-indigo-950 font-extrabold" : "text-slate-700")}>{field.label}</span>
+                        <div className={cn("w-5 h-5 rounded-lg border flex items-center justify-center transition-all", isSelected ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white")}>
+                          {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="p-8 bg-slate-50/50 border-t border-slate-100 flex gap-4">
+                <button onClick={() => setShowExcelModal(false)} className="flex-1 py-3.5 bg-white text-slate-600 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm">Cancel</button>
+                <button onClick={triggerExcelExport} className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/10 hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5">
+                  <FileDown className="w-4 h-4" /> Download Excel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

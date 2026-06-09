@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
-import { Check, CheckCircle2, TrendingUp, DollarSign, Image as ImageIcon, ChevronRight, Activity, MapPin, Eye, Clock } from 'lucide-react';
+import { Check, CheckCircle2, TrendingUp, Image as ImageIcon, ChevronRight, Activity } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../utils/cn';
 import { motion, AnimatePresence } from 'motion/react';

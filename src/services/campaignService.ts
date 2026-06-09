@@ -37,7 +37,7 @@ export const campaignService = {
   async create(campaign: Omit<Campaign, 'id' | 'created_at'>) {
     const { data, error } = await getSupabase()
       .from('campaigns')
-      .insert([campaign])
+      .insert([{ ...campaign, po_status: 'none', total_po_amount: 0, paid_po_amount: 0 }])
       .select()
       .single();
     
@@ -53,6 +53,43 @@ export const campaignService = {
       .select()
       .single();
     
+    if (error) throw error;
+    return data as Campaign;
+  },
+
+  async refreshPoSummary(id: number) {
+    const { data: pos, error: poError } = await getSupabase()
+      .from('purchase_orders')
+      .select('total_amount, paid_amount, status')
+      .eq('campaign_id', id);
+    if (poError) throw poError;
+
+    const totalAmount = pos.reduce((sum, po) => sum + Number(po.total_amount), 0);
+    const paidAmount = pos.reduce((sum, po) => sum + Number(po.paid_amount), 0);
+
+
+    let poStatus: Campaign['po_status'] = 'none';
+    if (pos.length > 0) {
+      const allPaid = pos.every(p => p.status === 'paid');
+      const hasPartial = pos.some(p => p.status === 'partial' || p.status === 'paid');
+      const anyCancelled = pos.every(p => p.status === 'cancelled');
+      if (anyCancelled && pos.length > 0) {
+        const nonCancelled = pos.filter(p => p.status !== 'cancelled');
+        if (nonCancelled.length === 0) poStatus = 'none';
+        else if (nonCancelled.every(p => p.status === 'paid')) poStatus = 'paid';
+        else poStatus = 'partial';
+      } else if (allPaid) poStatus = 'paid';
+      else if (hasPartial) poStatus = 'partial';
+      else poStatus = 'pending';
+    }
+
+    const { data, error } = await getSupabase()
+      .from('campaigns')
+      .update({ po_status: poStatus, total_po_amount: totalAmount, paid_po_amount: paidAmount })
+      .eq('id', id)
+      .select()
+      .single();
+
     if (error) throw error;
     return data as Campaign;
   },
