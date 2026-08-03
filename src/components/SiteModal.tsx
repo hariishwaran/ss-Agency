@@ -148,6 +148,24 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
     reader.readAsDataURL(file);
   };
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const file = Array.from(e.clipboardData?.items || [])
+        .find(item => item.type.startsWith('image/'))
+        ?.getAsFile();
+      
+      if (file) {
+        processFile(file);
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('paste', handlePaste as EventListener);
+    }
+    return () => {
+      window.removeEventListener('paste', handlePaste as EventListener);
+    };
+  }, [isOpen]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {

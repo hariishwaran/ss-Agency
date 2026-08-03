@@ -1,4 +1,4 @@
-import { Plus, MapPin, Camera, AlertCircle, Edit3, Smartphone, FileDown, FileText, Calendar, X, Check } from 'lucide-react';
+import { Plus, MapPin, Camera, AlertCircle, Edit3, Smartphone, FileDown, FileText, Calendar, X, Check, LayoutGrid, List as ListIcon, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportToExcel, exportToPPT } from '../utils/export';
 import { CustomDatePicker } from '../components/ui/DatePicker';
@@ -26,7 +26,7 @@ export default function Inventory() {
   const [filter, setFilter] = useState<'all' | 'available' | 'occupied'>('all');
   const [searchDate, setSearchDate] = useState<Date | null>(null);
   const [selectedCity, setSelectedCity] = useState<string>('all');
-
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const availableCities = useMemo(() => {
     const cities = new Set<string>();
     hoardingsList.forEach(h => {
@@ -313,6 +313,24 @@ export default function Inventory() {
             )}
           </div>
 
+          {/* View Toggle */}
+          <div className="flex bg-slate-100 p-1 rounded-xl">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn("p-2 rounded-lg transition-all", viewMode === 'grid' ? "bg-white shadow-sm text-slate-800" : "text-slate-400 hover:text-slate-600")}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn("p-2 rounded-lg transition-all", viewMode === 'list' ? "bg-white shadow-sm text-slate-800" : "text-slate-400 hover:text-slate-600")}
+              title="List View"
+            >
+              <ListIcon className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Excel/PDF Export buttons */}
           <button
             onClick={handleExportExcel}
@@ -371,155 +389,222 @@ export default function Inventory() {
         )}
       </AnimatePresence>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
-              <div className="relative aspect-[4/3] bg-slate-100 animate-pulse overflow-hidden">
-                <div className="absolute top-3 left-3 w-16 h-6 bg-slate-200 rounded-full"></div>
-                <div className="absolute top-3 right-3 w-20 h-6 bg-slate-200 rounded-full"></div>
-              </div>
-              <div className="p-4 flex-1 flex flex-col space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="w-2/3 h-5 bg-slate-100 rounded-md animate-pulse"></div>
-                  <div className="w-8 h-8 bg-slate-100 rounded-md animate-pulse"></div>
+      {viewMode === 'grid' ? (
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                <div className="relative aspect-[4/3] bg-slate-100 animate-pulse overflow-hidden">
+                  <div className="absolute top-3 left-3 w-16 h-6 bg-slate-200 rounded-full"></div>
+                  <div className="absolute top-3 right-3 w-20 h-6 bg-slate-200 rounded-full"></div>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-full h-4 bg-slate-100 rounded-md animate-pulse"></div>
-                  <div className="w-4/5 h-4 bg-slate-100 rounded-md animate-pulse"></div>
-                </div>
-                <div className="mt-auto grid grid-cols-2 gap-2 pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-slate-100 animate-pulse"></div>
-                    <div className="w-16 h-3 bg-slate-100 rounded-md animate-pulse"></div>
+                <div className="p-4 flex-1 flex flex-col space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="w-2/3 h-5 bg-slate-100 rounded-md animate-pulse"></div>
+                    <div className="w-8 h-8 bg-slate-100 rounded-md animate-pulse"></div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-slate-100 animate-pulse"></div>
-                    <div className="w-16 h-3 bg-slate-100 rounded-md animate-pulse"></div>
+                  <div className="space-y-2">
+                    <div className="w-full h-4 bg-slate-100 rounded-md animate-pulse"></div>
+                    <div className="w-4/5 h-4 bg-slate-100 rounded-md animate-pulse"></div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-1">
-                  <div className="w-16 h-4 bg-slate-100 rounded-md animate-pulse"></div>
-                  <div className="w-20 h-6 bg-slate-100 rounded-full animate-pulse"></div>
-                </div>
               </div>
+            ))
+          ) : filteredHoardings.length > 0 ? (
+            filteredHoardings.map((hoarding, i) => {
+              const now = new Date();
+              const siteCampaigns = campaigns.filter(c => c.hoarding_id === hoarding.id);
+              const activeCampaign = siteCampaigns.find(c => new Date(c.start_date) <= now && new Date(c.end_date) >= now);
+              const isOccupied = !!activeCampaign;
+
+              return (
+                <motion.div
+                  key={hoarding.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2, delay: i * 0.05 }}
+                  onClick={() => navigate(`/details/${hoarding.id}`)}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all group cursor-pointer flex flex-col"
+                >
+                  {/* Hero Image */}
+                  <div className="relative bg-slate-100 overflow-hidden shrink-0 aspect-[4/3] w-full">
+                    <img
+                      src={hoarding.image_url || 'https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?q=80&w=2070&auto=format&fit=crop'}
+                      alt={hoarding.location}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+
+                    {/* Status Badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest",
+                        isOccupied ? "bg-red-500 text-white" : "bg-emerald-500 text-white"
+                      )}>
+                        <span className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          isOccupied ? "bg-red-200" : "bg-emerald-200"
+                        )} />
+                        {isOccupied ? 'Occupied' : 'Available'}
+                      </div>
+                    </div>
+
+                    {/* Bottom gradient overlay with location name */}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-16">
+                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">
+                        {(hoarding.city || 'Chennai').toUpperCase()}
+                      </p>
+                      <h3 className="text-lg font-bold text-white leading-tight line-clamp-1">
+                        {hoarding.location}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Details Section */}
+                  <div className="p-5 flex-1">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</p>
+                        <p className="text-sm font-bold text-slate-800">{isOccupied ? 'Occupied' : 'Available'}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</p>
+                        <p className="text-sm font-bold text-slate-800">{hoarding.city || 'Chennai'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Footer */}
+                  <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleEdit(hoarding); }}
+                        className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all"
+                        title="Edit"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (hoarding.contact_number) {
+                            const message = encodeURIComponent(`Hello ${hoarding.owner_name}, this is a reminder regarding the hoarding at ${hoarding.location}.`);
+                            const formattedNumber = hoarding.contact_number.replace(/\D/g, '');
+                            window.open(`https://wa.me/${formattedNumber}?text=${message}`, '_blank');
+                          } else {
+                            showAlert({ title: 'Missing Info', message: 'Contact number not available for this site owner.', variant: 'warning' });
+                          }
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-800 hover:bg-slate-100 rounded-lg transition-all"
+                        title="WhatsApp"
+                      >
+                        <Smartphone className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <span className="text-xs font-bold text-indigo-600 group-hover:text-indigo-800 transition-colors">
+                      Details
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })
+          ) : (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
+               <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                 <Camera className="w-10 h-10" />
+               </div>
+               <div>
+                 <h3 className="text-xl font-bold text-slate-900">No Inventory Found</h3>
+                 <p className="text-slate-500 max-w-xs mx-auto">Start by adding your first hoarding unit to the visual inventory.</p>
+               </div>
             </div>
-          ))
-        ) : filteredHoardings.length > 0 ? (
-          filteredHoardings.map((hoarding, i) => {
-            const now = new Date();
-            const siteCampaigns = campaigns.filter(c => c.hoarding_id === hoarding.id);
-            const activeCampaign = siteCampaigns.find(c => new Date(c.start_date) <= now && new Date(c.end_date) >= now);
-            const isOccupied = !!activeCampaign;
+          )}
+        </section>
+      ) : (
+        <section className="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-sm">
+          {isLoading ? (
+            <div className="p-8 flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            </div>
+          ) : filteredHoardings.length > 0 ? (
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+                <tr>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Image</th>
+                  <th className="px-6 py-4">Location</th>
+                  <th className="px-6 py-4">City</th>
+                  <th className="px-6 py-4">Size (W×H)</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredHoardings.map((hoarding, i) => {
+                   const now = new Date();
+                   const siteCampaigns = campaigns.filter(c => c.hoarding_id === hoarding.id);
+                   const isOccupied = siteCampaigns.some(c => new Date(c.start_date) <= now && new Date(c.end_date) >= now);
 
-            return (
-              <motion.div
-                key={hoarding.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2, delay: i * 0.05 }}
-                onClick={() => navigate(`/details/${hoarding.id}`)}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all group cursor-pointer flex flex-col"
-              >
-                {/* Hero Image */}
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                  <img
-                    src={hoarding.image_url || 'https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?q=80&w=2070&auto=format&fit=crop'}
-                    alt={hoarding.location}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-
-                  {/* Status Badge — top-left, matching campaign cards */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <div className={cn(
-                      "px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest",
-                      isOccupied ? "bg-red-500 text-white" : "bg-emerald-500 text-white"
-                    )}>
-                      <span className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        isOccupied ? "bg-red-200" : "bg-emerald-200"
-                      )} />
-                      {isOccupied ? 'Occupied' : 'Available'}
-                    </div>
-                  </div>
-
-                  {/* Bottom gradient overlay with location name */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-16">
-                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">
-                      {(hoarding.city || 'Chennai').toUpperCase()}
-                    </p>
-                    <h3 className="text-lg font-bold text-white leading-tight line-clamp-1">
-                      {hoarding.location}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Details Section — public info only */}
-                <div className="p-5 flex-1">
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</p>
-                      <p className="text-sm font-bold text-slate-800">{isOccupied ? 'Occupied' : 'Available'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</p>
-                      <p className="text-sm font-bold text-slate-800">{hoarding.city || 'Chennai'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Footer — matches campaign card footer */}
-                <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleEdit(hoarding); }}
-                      className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all"
-                      title="Edit"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (hoarding.contact_number) {
-                          const message = encodeURIComponent(`Hello ${hoarding.owner_name}, this is a reminder regarding the hoarding at ${hoarding.location}.`);
-                          const formattedNumber = hoarding.contact_number.replace(/\D/g, '');
-                          window.open(`https://wa.me/${formattedNumber}?text=${message}`, '_blank');
-                        } else {
-                          showAlert({ title: 'Missing Info', message: 'Contact number not available for this site owner.', variant: 'warning' });
-                        }
-                      }}
-                      className="p-2 text-emerald-600 hover:text-emerald-800 hover:bg-slate-100 rounded-lg transition-all"
-                      title="WhatsApp"
-                    >
-                      <Smartphone className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <span
-                    className="text-xs font-bold text-indigo-600 group-hover:text-indigo-800 transition-colors"
-                  >
-                    Details
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })
-        ) : (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-4">
-             <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-               <Camera className="w-10 h-10" />
-             </div>
-             <div>
-               <h3 className="text-xl font-bold text-slate-900">No Inventory Found</h3>
-               <p className="text-slate-500 max-w-xs mx-auto">Start by adding your first hoarding unit to the visual inventory.</p>
-             </div>
-          </div>
-        )}
-
-      </section>
+                   return (
+                     <motion.tr 
+                       key={hoarding.id} 
+                       initial={{ opacity: 0, y: 10 }}
+                       animate={{ opacity: 1, y: 0 }}
+                       transition={{ duration: 0.1, delay: i * 0.02 }}
+                       onClick={() => navigate(`/details/${hoarding.id}`)} 
+                       className="hover:bg-slate-50 cursor-pointer transition-colors group"
+                     >
+                       <td className="px-6 py-4 font-medium text-slate-900">{hoarding.id}</td>
+                       <td className="px-6 py-4">
+                          <div className="w-12 h-8 rounded bg-slate-100 overflow-hidden">
+                            <img src={hoarding.image_url || 'https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?q=80&w=2070&auto=format&fit=crop'} alt={hoarding.location} className="w-full h-full object-cover" />
+                          </div>
+                       </td>
+                       <td className="px-6 py-4 font-bold text-slate-800">{hoarding.location}</td>
+                       <td className="px-6 py-4 text-slate-600">{hoarding.city || 'Chennai'}</td>
+                       <td className="px-6 py-4 text-slate-600">{hoarding.width}×{hoarding.height} ft</td>
+                       <td className="px-6 py-4">
+                         <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest flex w-max items-center gap-1.5", isOccupied ? "bg-red-50 text-red-600 border border-red-100" : "bg-emerald-50 text-emerald-600 border border-emerald-100")}>
+                           <span className={cn("w-1.5 h-1.5 rounded-full", isOccupied ? "bg-red-400" : "bg-emerald-400")} />
+                           {isOccupied ? 'Occupied' : 'Available'}
+                         </span>
+                       </td>
+                       <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); handleEdit(hoarding); }} className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-all" title="Edit"><Edit3 className="w-4 h-4" /></button>
+                            <button onClick={(e) => {
+                                e.stopPropagation();
+                                if (hoarding.contact_number) {
+                                  const message = encodeURIComponent(`Hello ${hoarding.owner_name}, this is a reminder regarding the hoarding at ${hoarding.location}.`);
+                                  const formattedNumber = hoarding.contact_number.replace(/\D/g, '');
+                                  window.open(`https://wa.me/${formattedNumber}?text=${message}`, '_blank');
+                                } else {
+                                  showAlert({ title: 'Missing Info', message: 'Contact number not available for this site owner.', variant: 'warning' });
+                                }
+                              }} className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-all" title="WhatsApp"><Smartphone className="w-4 h-4" /></button>
+                            <ChevronRight className="w-4 h-4 text-slate-300 ml-2 group-hover:text-slate-600 transition-colors" />
+                          </div>
+                       </td>
+                     </motion.tr>
+                   )
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+               <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                 <Camera className="w-10 h-10" />
+               </div>
+               <div>
+                 <h3 className="text-xl font-bold text-slate-900">No Inventory Found</h3>
+                 <p className="text-slate-500 max-w-xs mx-auto">Start by adding your first hoarding unit to the visual inventory.</p>
+               </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <AnimatePresence>
         {showConfirm && (

@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { getSupabase } from '../lib/supabase';
+import { api } from '../lib/api';
+
+export interface LocalUser {
+  id: string;
+  email: string;
+  name: string;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: LocalUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -12,47 +16,35 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = getSupabase();
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error fetching session:', error.message);
-      }
-      setSession(session);
-      setUser(session?.user ?? null);
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
       setLoading(false);
-    };
-
-    checkSession();
-
-    // Listen for changes on auth state (sign in, sign out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+      return;
+    }
+    api.get<LocalUser>('/auth/me')
+      .then((u) => setUser(u))
+      .catch(() => {
+        localStorage.removeItem('auth_token');
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Sign out failed:', error);
+      await api.post('/auth/logout', {});
+    } catch {
+      // ignore
     }
+    localStorage.removeItem('auth_token');
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

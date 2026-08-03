@@ -35,6 +35,7 @@ export default function Ledger() {
   const { alert: showAlert, alertProps } = useAlert();
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedHoardingFilter, setSelectedHoardingFilter] = useState<string>('all');
   const [newEntry, setNewEntry] = useState<Omit<LedgerEntry, 'id' | 'created_at'>>({
     hoarding_id: 0,
     campaign_id: undefined,
@@ -150,6 +151,11 @@ export default function Ledger() {
   };
 
   const filteredEntries = entries.filter(entry => {
+    if (selectedHoardingFilter !== 'all') {
+      const hId = parseInt(selectedHoardingFilter, 10);
+      if (entry.hoarding_id !== hId) return false;
+    }
+
     const site = hoardings[entry.hoarding_id]?.location || '';
     const campaignName = entry.campaign_id ? campaigns[entry.campaign_id]?.client_info || '' : '';
     return site.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -195,7 +201,23 @@ export default function Ledger() {
       </section>
 
       <div className="bg-white rounded-[40px] shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-end gap-6">
+        <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter by Site:</label>
+            <select
+              value={selectedHoardingFilter}
+              onChange={(e) => setSelectedHoardingFilter(e.target.value)}
+              className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-slate-900 outline-none"
+            >
+              <option value="all">All Inventory Sites ({Object.keys(hoardings).length})</option>
+              {Object.values(hoardings).map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.location} ({h.city || 'Madurai'})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex gap-3">
              <button className="px-6 py-3 bg-slate-50 rounded-xl text-slate-500 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 border border-slate-200 hover:bg-slate-100 transition-colors">
                <Download className="w-4 h-4" /> Export CSV

@@ -25,15 +25,13 @@ const bottomItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col py-8 px-4 gap-2 z-50">
-      <div className="mb-8 px-4">
-        <div className="flex items-center gap-2 mb-1">
-          <img src="/SS%20LOGO%20.jpg.jpeg" alt="SS Advertisers" className="h-16 w-auto" />
-        </div>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-2">Hoarding management</p>
+    <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col z-50">
+      <div className="h-20 flex items-center justify-center p-4 mb-2">
+        <img src="/SS%20LOGO%20.jpg.jpeg" alt="SS Advertisers" className="h-24 w-auto object-contain" />
       </div>
       
-      <nav className="flex-1 space-y-1">
+      <div className="flex-1 flex flex-col px-4 gap-2 overflow-y-auto">
+        <nav className="flex-1 space-y-1">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -68,6 +66,7 @@ export default function Sidebar() {
             <span>{item.label}</span>
           </NavLink>
         ))}
+      </div>
       </div>
     </aside>
   );

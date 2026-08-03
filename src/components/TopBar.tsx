@@ -13,7 +13,7 @@ export default function TopBar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const fullName = (user as any)?.name || user?.email?.split('@')[0] || 'User';
   const initials = fullName.charAt(0).toUpperCase();
 
   // Clear search query when changing routes
@@ -60,7 +60,7 @@ export default function TopBar() {
           <div className="text-right hidden md:block">
             <p className="text-sm font-bold text-slate-900">{fullName}</p>
             <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-              {user?.user_metadata?.role || 'Site Admin'}
+              Site Admin
             </p>
           </div>
           <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-sm border-2 border-slate-100 shadow-sm ring-1 ring-slate-200 hover:bg-slate-800 transition-colors cursor-pointer">

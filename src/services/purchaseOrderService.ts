@@ -1,65 +1,48 @@
-import { getSupabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { PurchaseOrder, LedgerEntry } from '../types';
 import { ledgerService } from './ledgerService';
 
 export const purchaseOrderService = {
   async getAll() {
-    const { data, error } = await getSupabase()
-      .from('purchase_orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return data as PurchaseOrder[];
+    return api.get<PurchaseOrder[]>('/purchase_orders');
   },
 
   async getByCampaignId(campaignId: number) {
-    const { data, error } = await getSupabase()
-      .from('purchase_orders')
-      .select('*')
-      .eq('campaign_id', campaignId)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return data as PurchaseOrder[];
+    return api.get<PurchaseOrder[]>(`/purchase_orders/by-campaign/${campaignId}`);
   },
 
   async getById(id: string) {
-    const { data, error } = await getSupabase()
-      .from('purchase_orders')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (error) throw error;
-    return data as PurchaseOrder;
+    return api.get<PurchaseOrder>(`/purchase_orders/${id}`);
   },
 
   async create(po: Omit<PurchaseOrder, 'id' | 'created_at' | 'updated_at'>) {
-    const { data, error } = await getSupabase()
-      .from('purchase_orders')
-      .insert([{ ...po, balance_amount: po.total_amount, paid_amount: 0, status: 'draft' }])
-      .select()
-      .single();
-    if (error) throw error;
-    return data as PurchaseOrder;
+    return api.post<PurchaseOrder>('/purchase_orders', po);
   },
 
   async update(id: string, updates: Partial<PurchaseOrder>) {
-    const { data, error } = await getSupabase()
-      .from('purchase_orders')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data as PurchaseOrder;
+    return api.put<PurchaseOrder>(`/purchase_orders/${id}`, updates);
   },
 
-  async recordPayment(poId: string, payment: { amount: number; payment_date: string; payment_method: LedgerEntry['payment_method']; receipt_url?: string | null; reference_number?: string }) {
+  async recordPayment(
+    poId: string,
+    payment: {
+      amount: number;
+      payment_date: string;
+      payment_method: LedgerEntry['payment_method'];
+      receipt_url?: string | null;
+      reference_number?: string;
+    }
+  ) {
     const po = await this.getById(poId);
     const newPaidAmount = po.paid_amount + payment.amount;
     const newBalance = po.total_amount - newPaidAmount;
     const newStatus = newBalance <= 0 ? 'paid' : 'partial';
 
-    await this.update(poId, { paid_amount: newPaidAmount, balance_amount: newBalance, status: newStatus });
+    await this.update(poId, {
+      paid_amount: newPaidAmount,
+      balance_amount: newBalance,
+      status: newStatus,
+    });
 
     await ledgerService.create({
       hoarding_id: po.hoarding_id,
@@ -78,10 +61,6 @@ export const purchaseOrderService = {
   },
 
   async delete(id: string) {
-    const { error } = await getSupabase()
-      .from('purchase_orders')
-      .delete()
-      .eq('id', id);
-    if (error) throw error;
+    await api.delete(`/purchase_orders/${id}`);
   },
 };

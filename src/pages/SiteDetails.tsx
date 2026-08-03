@@ -1,11 +1,13 @@
-import { Shield, PlusCircle, ChevronRight, Trash2, Loader2, Maximize } from 'lucide-react';
+import { Shield, PlusCircle, ChevronRight, Trash2, Loader2, Maximize, Printer, Wallet, Calendar, Banknote } from 'lucide-react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { Hoarding } from '../types';
+import { Hoarding, FlexPrinting, LedgerEntry } from '../types';
 import { hoardingService } from '../services/hoardingService';
 import { campaignService } from '../services/campaignService';
+import { flexPrintingService } from '../services/flexPrintingService';
+import { ledgerService } from '../services/ledgerService';
 import CampaignModal from '../components/CampaignModal';
 import SiteModal from '../components/SiteModal';
 import { format, parseISO } from 'date-fns';
@@ -18,6 +20,9 @@ export default function SiteDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [flexJobs, setFlexJobs] = useState<FlexPrinting[]>([]);
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'flex' | 'ledger'>('campaigns');
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -36,7 +41,7 @@ export default function SiteDetails() {
   useEffect(() => {
     if (id) {
       loadHoarding();
-      loadBookings();
+      loadRelatedData();
     }
   }, [id]);
 
@@ -81,16 +86,27 @@ export default function SiteDetails() {
     });
   };
 
-  const loadBookings = async () => {
+  const loadRelatedData = async () => {
     try {
-      const siteBookings = await campaignService.getByHoardingId(Number(id));
+      const siteId = Number(id);
+      const [siteBookings, allFlex, allLedger] = await Promise.all([
+        campaignService.getByHoardingId(siteId),
+        flexPrintingService.getAll(),
+        ledgerService.getAll()
+      ]);
+      
       setBookings(siteBookings.map(c => ({
+        id: c.id,
         startDate: new Date(c.start_date),
         endDate: new Date(c.end_date),
-        campaignName: c.client_info
+        campaignName: c.client_info,
+        raw: c
       })));
+
+      setFlexJobs(allFlex.filter(f => f.hoarding_id === siteId));
+      setLedgerEntries(allLedger.filter(l => l.hoarding_id === siteId));
     } catch (error) {
-      console.error('Error loading bookings:', error);
+      console.error('Error loading site related data:', error);
     }
   };
 
@@ -393,52 +409,186 @@ export default function SiteDetails() {
           </div>
         </div>
 
-        {/* Campaign Timeline Section */}
-        <div className="bg-white rounded-[2.5rem] border border-slate-200/80 p-8 shadow-sm">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Campaign Timeline</h3>
-            <div className="flex items-center gap-4 text-[10px] font-bold tracking-wider uppercase text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-                Occupied
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                Upcoming
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border border-dashed border-slate-400" />
-                Vacant
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-100 pt-6">
-            {/* Months Header Grid */}
-            <div className="grid grid-cols-5 text-center text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-4">
-              <div>April</div>
-              <div>May</div>
-              <div>June</div>
-              <div>July</div>
-              <div>August</div>
+        {/* Site Relationship Hub: Campaigns, Flex Printing, Ledger */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-200/80 p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('campaigns')}
+                className={cn(
+                  "px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2",
+                  activeTab === 'campaigns'
+                    ? "bg-slate-900 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                <Calendar className="w-4 h-4" />
+                Campaigns ({bookings.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('flex')}
+                className={cn(
+                  "px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2",
+                  activeTab === 'flex'
+                    ? "bg-slate-900 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                <Printer className="w-4 h-4" />
+                Flex Printing ({flexJobs.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('ledger')}
+                className={cn(
+                  "px-5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2",
+                  activeTab === 'ledger'
+                    ? "bg-slate-900 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                <Wallet className="w-4 h-4" />
+                Finance Ledger ({ledgerEntries.length})
+              </button>
             </div>
 
-            {/* Visual Gantt Bar Grid */}
-            <div className="grid grid-cols-12 gap-3 items-center">
-              {bookings.filter(b => b.hoarding_id === hoarding.id).length > 0 ? (
-                bookings.filter(b => b.hoarding_id === hoarding.id).map((booking, idx) => (
-                  <div
-                    key={idx}
-                    className="col-span-4 bg-blue-600 text-white py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center truncate shadow-sm"
-                  >
-                    {booking.campaignName}
-                  </div>
-                ))
+            {activeTab === 'campaigns' && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition flex items-center gap-1.5"
+              >
+                <PlusCircle className="w-4 h-4" /> New Campaign
+              </button>
+            )}
+            {activeTab === 'flex' && (
+              <button
+                onClick={() => navigate('/flex-printing')}
+                className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition flex items-center gap-1.5"
+              >
+                <Printer className="w-4 h-4" /> Manage Flex Jobs
+              </button>
+            )}
+            {activeTab === 'ledger' && (
+              <button
+                onClick={() => navigate('/ledger')}
+                className="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition flex items-center gap-1.5"
+              >
+                <Banknote className="w-4 h-4" /> Go to Ledger
+              </button>
+            )}
+          </div>
+
+          {/* TAB 1: Campaigns */}
+          {activeTab === 'campaigns' && (
+            <div className="space-y-4">
+              {bookings.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm font-semibold">No active or scheduled campaigns for this site.</p>
+                </div>
               ) : (
-                <p className="col-span-12 text-center text-sm text-slate-500">No campaigns for this hoarding.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bookings.map((booking, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => booking.raw?.id && navigate(`/campaigns/${booking.raw.id}`)}
+                      className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 transition cursor-pointer flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-widest">
+                            Campaign #{booking.raw?.id || idx + 1}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400">
+                            {format(booking.startDate, 'dd MMM yyyy')} - {format(booking.endDate, 'dd MMM yyyy')}
+                          </span>
+                        </div>
+                        <h4 className="text-base font-bold text-slate-900">{booking.campaignName}</h4>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-indigo-600">
+                        <span>View Details</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
+          )}
+
+          {/* TAB 2: Flex Printing Orders */}
+          {activeTab === 'flex' && (
+            <div className="space-y-4">
+              {flexJobs.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <Printer className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm font-semibold">No flex printing orders linked to this site.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {flexJobs.map((job) => (
+                    <div key={job.id} className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-lg bg-purple-100 text-purple-700 text-[10px] font-bold uppercase">
+                          {job.printing_type === 'outsource' ? 'Outsourced' : 'In-House'}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">
+                          {job.status}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">Flex Size: {job.flex_size || `${hoarding.width}x${hoarding.height} ft`}</p>
+                        <p className="text-xs text-slate-500 font-medium">Quantity: {job.quantity}</p>
+                        {job.vendor_name && (
+                          <p className="text-xs text-slate-600 mt-1">Vendor: <span className="font-bold">{job.vendor_name}</span></p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: Finance Ledger */}
+          {activeTab === 'ledger' && (
+            <div className="space-y-4">
+              {ledgerEntries.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <Wallet className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm font-semibold">No ledger payment records found for this site.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">Period</th>
+                        <th className="px-4 py-3">Type</th>
+                        <th className="px-4 py-3">Method</th>
+                        <th className="px-4 py-3 text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {ledgerEntries.map((entry) => (
+                        <tr key={entry.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 font-medium text-slate-700">{format(parseISO(entry.payment_date), 'dd MMM yyyy')}</td>
+                          <td className="px-4 py-3 text-xs text-slate-500">{entry.period_covered}</td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest bg-indigo-50 text-indigo-700">
+                              {entry.transaction_type}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs font-semibold text-slate-600">{entry.payment_method}</td>
+                          <td className="px-4 py-3 text-right font-bold text-slate-900">₹ {entry.amount_paid.toLocaleString('en-IN')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
       </section>

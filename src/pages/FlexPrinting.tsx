@@ -1,8 +1,10 @@
-import { Printer, Plus, Truck, Building2 } from 'lucide-react';
+import { Printer, Plus, Truck, Building2, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { flexPrintingService } from '../services/flexPrintingService';
-import { FlexPrinting } from '../types';
+import { hoardingService } from '../services/hoardingService';
+import { FlexPrinting, Hoarding } from '../types';
 import { cn } from '../utils/cn';
 import { useSearch } from '../context/SearchContext';
 import { useConfirm } from '../hooks/useConfirm';
@@ -34,6 +36,7 @@ const statusLabels: Record<string, string> = {
 };
 
 interface FormData {
+  hoarding_id?: string;
   printing_type: 'outsource' | 'own_printing';
   flex_size: string;
   quantity: number;
@@ -51,6 +54,7 @@ interface FormData {
 }
 
 const emptyForm: FormData = {
+  hoarding_id: '',
   printing_type: 'outsource',
   flex_size: '',
   quantity: 1,
@@ -68,12 +72,15 @@ const emptyForm: FormData = {
 };
 
 export default function FlexPrintingPage() {
+  const navigate = useNavigate();
   const { searchQuery } = useSearch();
   const { confirm, confirmProps } = useConfirm();
   const { alert: showAlert, alertProps } = useAlert();
 
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<FlexPrinting[]>([]);
+  const [hoardings, setHoardings] = useState<Hoarding[]>([]);
+  const [selectedHoardingFilter, setSelectedHoardingFilter] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FlexPrinting | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -88,14 +95,24 @@ export default function FlexPrintingPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const data = await flexPrintingService.getAll();
+      const [data, hoardingList] = await Promise.all([
+        flexPrintingService.getAll(),
+        hoardingService.getAll(),
+      ]);
       setItems(data);
+      setHoardings(hoardingList);
     } catch (error) {
       console.error('Error fetching flex printing records:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const hoardingMap = useMemo(() => {
+    const map: Record<number, Hoarding> = {};
+    hoardings.forEach(h => { map[h.id] = h; });
+    return map;
+  }, [hoardings]);
 
   const openCreate = () => {
     setEditingItem(null);
@@ -106,6 +123,7 @@ export default function FlexPrintingPage() {
   const openEdit = (item: FlexPrinting) => {
     setEditingItem(item);
     setForm({
+      hoarding_id: item.hoarding_id ? item.hoarding_id.toString() : '',
       printing_type: item.printing_type,
       flex_size: item.flex_size || '',
       quantity: item.quantity,
@@ -147,6 +165,16 @@ export default function FlexPrintingPage() {
     }
   };
 
+  const handleSelectHoarding = (hIdStr: string) => {
+    const hId = parseInt(hIdStr, 10);
+    const targetHoarding = hoardings.find(h => h.id === hId);
+    setForm(prev => ({
+      ...prev,
+      hoarding_id: hIdStr,
+      flex_size: targetHoarding ? `${targetHoarding.width}x${targetHoarding.height} ft` : prev.flex_size
+    }));
+  };
+
   const handleSubmit = async () => {
     if (!form.flex_size) {
       await showAlert({ title: 'Validation Error', message: 'Flex size is required.', variant: 'danger' });
@@ -156,6 +184,7 @@ export default function FlexPrintingPage() {
     try {
       setSaving(true);
       const payload: any = {
+        hoarding_id: form.hoarding_id ? parseInt(form.hoarding_id, 10) : null,
         printing_type: form.printing_type,
         flex_size: form.flex_size,
         quantity: form.quantity,
@@ -200,17 +229,22 @@ export default function FlexPrintingPage() {
     if (filterType !== 'all') {
       list = list.filter((item) => item.printing_type === filterType);
     }
+    if (selectedHoardingFilter !== 'all') {
+      const hId = parseInt(selectedHoardingFilter, 10);
+      list = list.filter((item) => item.hoarding_id === hId);
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (item) =>
           item.flex_size?.toLowerCase().includes(q) ||
           item.vendor_name?.toLowerCase().includes(q) ||
-          item.notes?.toLowerCase().includes(q)
+          item.notes?.toLowerCase().includes(q) ||
+          (item.hoarding_id && hoardingMap[item.hoarding_id]?.location.toLowerCase().includes(q))
       );
     }
     return list;
-  }, [items, filterType, searchQuery]);
+  }, [items, filterType, selectedHoardingFilter, searchQuery, hoardingMap]);
 
   const renderSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -240,21 +274,38 @@ export default function FlexPrintingPage() {
         </button>
       </div>
 
-      <div className="flex items-center gap-2">
-        {['all', 'outsource', 'own_printing'].map((type) => (
-          <button
-            key={type}
-            onClick={() => setFilterType(type)}
-            className={cn(
-              'px-4 py-2 rounded-xl text-sm font-medium transition-all',
-              filterType === type
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            )}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          {['all', 'outsource', 'own_printing'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all',
+                filterType === type
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              )}
+            >
+              {type === 'all' ? 'All Types' : typeLabels[type]}
+            </button>
+          ))}
+        </div>
+
+        <div className="ml-auto">
+          <select
+            value={selectedHoardingFilter}
+            onChange={(e) => setSelectedHoardingFilter(e.target.value)}
+            className="px-4 py-2 bg-slate-100 border-none rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-slate-900 outline-none"
           >
-            {type === 'all' ? 'All' : typeLabels[type]}
-          </button>
-        ))}
+            <option value="all">All Inventory Sites ({hoardings.length})</option>
+            {hoardings.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.location} ({h.city || 'Madurai'})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {isLoading ? (
@@ -281,72 +332,87 @@ export default function FlexPrintingPage() {
       ) : (
         <AnimatePresence mode="popLayout">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-3xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('px-3 py-1 rounded-lg text-xs font-bold', typeColors[item.printing_type])}>
-                      {typeLabels[item.printing_type]}
-                    </span>
-                    <span className={cn('px-3 py-1 rounded-lg text-xs font-bold', statusColors[item.status])}>
-                      {statusLabels[item.status]}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Printer className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span className="text-sm font-semibold text-slate-900">{item.flex_size}</span>
-                    <span className="text-xs text-slate-400">x{item.quantity}</span>
-                  </div>
-
-                  {item.printing_type === 'outsource' && item.vendor_name && (
-                    <div className="flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="text-sm text-slate-600">{item.vendor_name}</span>
+            {filteredItems.map((item) => {
+              const hoarding = item.hoarding_id ? hoardingMap[item.hoarding_id] : null;
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-white rounded-3xl border border-slate-200 p-6 hover:shadow-md transition-shadow flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className={cn('px-3 py-1 rounded-lg text-xs font-bold', typeColors[item.printing_type])}>
+                          {typeLabels[item.printing_type]}
+                        </span>
+                        <span className={cn('px-3 py-1 rounded-lg text-xs font-bold', statusColors[item.status])}>
+                          {statusLabels[item.status]}
+                        </span>
+                      </div>
                     </div>
-                  )}
 
-                  {item.printing_type === 'own_printing' && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="text-sm text-slate-600">
-                        Cost: ₹{((item.material_cost || 0) + (item.labor_cost || 0)).toLocaleString()}
-                      </span>
+                    {hoarding && (
+                      <button
+                        onClick={() => navigate(`/details/${hoarding.id}`)}
+                        className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition mb-3 text-left w-full truncate"
+                      >
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{hoarding.location} ({hoarding.city || 'Madurai'})</span>
+                      </button>
+                    )}
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Printer className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span className="text-sm font-semibold text-slate-900">{item.flex_size}</span>
+                        <span className="text-xs text-slate-400">x{item.quantity}</span>
+                      </div>
+
+                      {item.printing_type === 'outsource' && item.vendor_name && (
+                        <div className="flex items-center gap-2">
+                          <Truck className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span className="text-sm text-slate-600">{item.vendor_name}</span>
+                        </div>
+                      )}
+
+                      {item.printing_type === 'own_printing' && (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span className="text-sm text-slate-600">
+                            Cost: ₹{((item.material_cost || 0) + (item.labor_cost || 0)).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+
+                      {item.notes && (
+                        <p className="text-xs text-slate-400 line-clamp-2 mt-1">{item.notes}</p>
+                      )}
                     </div>
-                  )}
+                  </div>
 
-                  {item.notes && (
-                    <p className="text-xs text-slate-400 line-clamp-2 mt-1">{item.notes}</p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
-                  <button
-                    onClick={() => openEdit(item)}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <span className="text-slate-200">|</span>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    disabled={deletingId === item.id}
-                    className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
-                  >
-                    {deletingId === item.id ? 'Deleting...' : 'Delete'}
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => openEdit(item)}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <span className="text-slate-200">|</span>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      disabled={deletingId === item.id}
+                      className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === item.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </AnimatePresence>
       )}
@@ -371,6 +437,22 @@ export default function FlexPrintingPage() {
               </h2>
 
               <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Inventory Site (Hoarding)</label>
+                  <select
+                    value={form.hoarding_id || ''}
+                    onChange={(e) => handleSelectHoarding(e.target.value)}
+                    className="w-full mt-2 px-4 py-3 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-600/20 focus:bg-white transition-all outline-none"
+                  >
+                    <option value="">-- Select Inventory Site --</option>
+                    {hoardings.map((h) => (
+                      <option key={h.id} value={h.id}>
+                        {h.location} ({h.city || 'Madurai'}) - {h.width}x{h.height} ft
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Printing Type</label>
                   <div className="flex gap-3 mt-2">

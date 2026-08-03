@@ -1,6 +1,6 @@
-import { X, Calendar, User, MapPin, Check, FileText, Clock, Loader2, Trash2 } from 'lucide-react';
+import { X, Calendar, User, MapPin, Check, FileText, Clock, Loader2, Trash2, Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Campaign, Hoarding } from '../types';
 import { CustomDatePicker } from './ui/DatePicker';
 import { format, parseISO } from 'date-fns';
@@ -36,10 +36,43 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
   });
   const [hoardings, setHoardings] = useState<Hoarding[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+
+  // Derive unique cities from loaded hoardings
+  const cities = useMemo(() => {
+    const citySet = new Set(hoardings.map(h => h.city).filter((c): c is string => Boolean(c)));
+    return Array.from(citySet).sort();
+  }, [hoardings]);
+
+  // Filter hoardings based on search query and city
+  const filteredHoardings = useMemo(() => {
+    let filtered = hoardings;
+    if (selectedCity !== 'all') {
+      filtered = filtered.filter(h => h.city === selectedCity);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(h => 
+        h.location.toLowerCase().includes(q) ||
+        (h.city && h.city.toLowerCase().includes(q))
+      );
+    }
+    // Sort: selected hoardings first
+    return filtered.sort((a, b) => {
+      const aSelected = formData.hoarding_ids.includes(a.id) ? 0 : 1;
+      const bSelected = formData.hoarding_ids.includes(b.id) ? 0 : 1;
+      return aSelected - bSelected;
+    });
+  }, [hoardings, searchQuery, selectedCity, formData.hoarding_ids]);
 
   useEffect(() => {
     if (isOpen) {
       loadHoardings();
+      setSearchQuery('');
+      setSelectedCity('all');
+      setIsCityDropdownOpen(false);
       if (campaign) {
         setFormData({
           client_info: campaign.client_info,
@@ -210,12 +243,92 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
                       {formData.hoarding_ids.length} selected
                     </span>
                   </div>
+
+                  {/* Search & City Filter */}
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search by location or city..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium placeholder:text-slate-400"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all whitespace-nowrap",
+                          selectedCity !== 'all'
+                            ? "bg-slate-900 text-white border-slate-900"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
+                        )}
+                      >
+                        <MapPin className="w-3 h-3" />
+                        {selectedCity === 'all' ? 'All Cities' : selectedCity}
+                        <ChevronDown className={cn("w-3 h-3 transition-transform", isCityDropdownOpen && "rotate-180")} />
+                      </button>
+                      {isCityDropdownOpen && (
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-10 py-1 max-h-48 overflow-y-auto custom-scrollbar">
+                          <button
+                            type="button"
+                            onClick={() => { setSelectedCity('all'); setIsCityDropdownOpen(false); }}
+                            className={cn(
+                              "w-full text-left px-3 py-2 text-xs font-medium transition-colors",
+                              selectedCity === 'all' ? "bg-slate-100 text-slate-900 font-bold" : "text-slate-600 hover:bg-slate-50"
+                            )}
+                          >
+                            All Cities
+                          </button>
+                          {cities.map((city) => (
+                            <button
+                              key={city}
+                              type="button"
+                              onClick={() => { setSelectedCity(city); setIsCityDropdownOpen(false); }}
+                              className={cn(
+                                "w-full text-left px-3 py-2 text-xs font-medium transition-colors",
+                                selectedCity === city ? "bg-slate-100 text-slate-900 font-bold" : "text-slate-600 hover:bg-slate-50"
+                              )}
+                            >
+                              {city}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Results count */}
+                  {(searchQuery || selectedCity !== 'all') && (
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                      {filteredHoardings.length} of {hoardings.length} hoardings
+                    </p>
+                  )}
+
                   <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                     {isLoading ? (
                       <div className="py-8 flex justify-center">
                         <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
                       </div>
-                    ) : hoardings.map((site) => {
+                    ) : filteredHoardings.length === 0 ? (
+                      <div className="py-6 text-center">
+                        <Search className="w-5 h-5 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs text-slate-400 font-medium">No hoardings found</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Try a different search or city</p>
+                      </div>
+                    ) : filteredHoardings.map((site) => {
                       const isSelected = formData.hoarding_ids.includes(site.id);
                       return (
                         <button
@@ -239,6 +352,12 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
                             <div className="pr-4 flex flex-col gap-0.5">
                               <p className={cn("text-xs font-bold truncate max-w-[200px]", isSelected ? "text-slate-900" : "text-slate-900")}>{site.location}</p>
                               <div className="flex items-center gap-2">
+                                {site.city && (
+                                  <>
+                                    <span className="text-[9px] text-indigo-500 font-bold">{site.city}</span>
+                                    <span className="text-slate-300">•</span>
+                                  </>
+                                )}
                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{site.width}×{site.height} ft</p>
                                 {site.latitude && site.longitude && (
                                   <>

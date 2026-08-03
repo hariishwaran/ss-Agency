@@ -1,59 +1,26 @@
-import { getSupabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { FlexPrinting } from '../types';
 
 export const flexPrintingService = {
   async getAll() {
-    const { data, error } = await getSupabase()
-      .from('flex_printing')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data as FlexPrinting[];
+    return api.get<FlexPrinting[]>('/flex_printing');
   },
 
   async getById(id: number) {
-    const { data, error } = await getSupabase()
-      .from('flex_printing')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return data as FlexPrinting;
+    return api.get<FlexPrinting>(`/flex_printing/${id}`);
   },
 
   async create(printing: Omit<FlexPrinting, 'id' | 'created_at' | 'updated_at' | 'total_cost'>) {
     const { id, created_at, updated_at, total_cost, ...cleanData } = printing as any;
-    const { data, error } = await getSupabase()
-      .from('flex_printing')
-      .insert([cleanData])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as FlexPrinting;
+    return api.post<FlexPrinting>('/flex_printing', cleanData);
   },
 
   async update(id: number, printing: Partial<FlexPrinting>) {
     const { id: _id, created_at, updated_at, total_cost, ...cleanData } = printing as any;
-    const { data, error } = await getSupabase()
-      .from('flex_printing')
-      .update(cleanData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as FlexPrinting;
+    return api.put<FlexPrinting>(`/flex_printing/${id}`, cleanData);
   },
 
   async delete(id: number) {
-    const { error } = await getSupabase()
-      .from('flex_printing')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    await api.delete(`/flex_printing/${id}`);
   },
 };

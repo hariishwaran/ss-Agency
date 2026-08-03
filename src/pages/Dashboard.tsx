@@ -1,4 +1,4 @@
-import { ArrowUpRight, Plus, CalendarDays, Filter, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, Plus, CalendarDays, Filter, AlertCircle, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -171,11 +171,11 @@ export default function Dashboard() {
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-500">Total Assets</span>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <h3 className="text-4xl font-light tracking-tight text-slate-900">{hoardings.length > 0 ? hoardings.length : 12}</h3>
+                  <h3 className="text-4xl font-light tracking-tight text-slate-900">{hoardings.length}</h3>
                 </div>
               </div>
               <div className="mt-6 text-[11px] font-bold text-slate-400">
-                {hoardings.length > 0 ? `${hoardings.filter(h => h.rent_status === 'Paid').length} Active • ${hoardings.filter(h => h.rent_status !== 'Paid').length} Maintenance` : '9 Active • 3 Maintenance'}
+                {`${hoardings.filter(h => h.rent_status === 'Paid').length} Active • ${hoardings.filter(h => h.rent_status !== 'Paid').length} Maintenance`}
               </div>
             </motion.div>
 
@@ -189,10 +189,10 @@ export default function Dashboard() {
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-400">Active Campaigns</span>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <h3 className="text-4xl font-light tracking-tight text-white">{campaigns.length > 0 ? campaigns.filter(c => new Date(c.end_date) >= new Date()).length : 3}</h3>
+                  <h3 className="text-4xl font-light tracking-tight text-white">{campaigns.filter(c => new Date(c.end_date) >= new Date()).length}</h3>
                 </div>
               </div>
-              <div className="mt-6 text-[11px] font-bold text-slate-400 opacity-80">↑ 12% from last month</div>
+              <div className="mt-6 text-[11px] font-bold text-slate-400 opacity-80">{campaigns.length} total campaigns</div>
             </motion.div>
 
             <motion.div 
@@ -206,7 +206,7 @@ export default function Dashboard() {
                 <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-slate-500">Avg Occupancy</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <h3 className="text-4xl font-light tracking-tight text-slate-900">
-                    {hoardings.length > 0 ? Math.round((hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100) : 75}%
+                    {hoardings.length > 0 ? Math.round((hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100) : 0}%
                   </h3>
                 </div>
               </div>
@@ -214,7 +214,7 @@ export default function Dashboard() {
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${hoardings.length > 0 ? (hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100 : 75}%` }}
+                    animate={{ width: `${hoardings.length > 0 ? (hoardings.filter(h => h.rent_status === 'Paid').length / hoardings.length) * 100 : 0}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
                     className="bg-indigo-600 h-full rounded-full" 
                   />
@@ -232,12 +232,21 @@ export default function Dashboard() {
               <div className="space-y-1">
                 <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Recent Campaigns</h4>
               </div>
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
-              >
-                <Plus className="w-3.5 h-3.5" /> Create New
-              </button>
+              <div className="flex items-center gap-3">
+                <a 
+                  href="/location_images.zip"
+                  download="location_images.zip"
+                  className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors shadow-sm"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download Site Images
+                </a>
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Create New
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4">
