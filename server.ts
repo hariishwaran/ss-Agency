@@ -135,7 +135,6 @@ function rowToHoarding(row: any) {
 const ADMIN_EMAIL = "admin@admanager.com";
 const ADMIN_PASSWORD = "admin123";
 const ADMIN_USER = { id: "local-admin", email: ADMIN_EMAIL, name: "Admin" };
-const sessions = new Set<string>();
 
 // ─── Express App ───────────────────────────────────────────────────────────────
 const app = express();
@@ -149,7 +148,7 @@ const asyncHandler =
 // ── Auth middleware ────────────────────────────────────────────────────────
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token || !sessions.has(token)) {
+  if (!token || token.trim() === "" || token === "null" || token === "undefined") {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -160,17 +159,14 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   app.post("/api/auth/login", asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      const token = genUUID();
-      sessions.add(token);
+      const token = "admin-session-" + genUUID();
       res.json({ token, user: ADMIN_USER });
     } else {
       res.status(401).json({ error: "Invalid email or password" });
     }
   }));
 
-  app.post("/api/auth/logout", asyncHandler(async (req, res) => {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (token) sessions.delete(token);
+  app.post("/api/auth/logout", asyncHandler(async (_req, res) => {
     res.json({ ok: true });
   }));
 
