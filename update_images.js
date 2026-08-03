@@ -98,7 +98,7 @@ async function run() {
 
     if (bestMatch) {
       matchedCount++;
-      const imageUrl = `/location_images/${encodeURIComponent(bestMatch)}`;
+      const imageUrl = `https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/${encodeURIComponent(bestMatch)}`;
       await pool.query('UPDATE hoardings SET image_url = $1 WHERE id = $2', [imageUrl, hoarding.id]);
       updatedCount++;
       console.log(`[MATCH] DB ID ${hoarding.id}: "${hoarding.location}" (${hW}x${hH}) -> "${bestMatch}" (Score: ${maxScore.toFixed(2)})`);
