@@ -15,6 +15,15 @@ pool.on('error', (err) => {
 
 async function initDb() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS owners (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      contact_number TEXT NOT NULL,
+      email TEXT,
+      payment_details TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS hoardings (
       id SERIAL PRIMARY KEY,
       location TEXT NOT NULL,
@@ -22,8 +31,9 @@ async function initDb() {
       width REAL NOT NULL,
       height REAL NOT NULL,
       total_area REAL GENERATED ALWAYS AS (width * height) STORED,
-      owner_name TEXT NOT NULL,
-      contact_number TEXT NOT NULL,
+      owner_name TEXT,
+      contact_number TEXT,
+      owner_id INTEGER REFERENCES owners(id) ON DELETE SET NULL,
       rent_amount REAL NOT NULL,
       rent_status TEXT DEFAULT 'Pending' CHECK (rent_status IN ('Paid', 'Pending')),
       last_paid_date TEXT,
@@ -107,6 +117,53 @@ async function initDb() {
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
   `);
+
+  // Migrate existing data from hoardings -> owners
+  try {
+    await pool.query(`
+      ALTER TABLE hoardings ADD COLUMN IF NOT EXISTS owner_id INTEGER REFERENCES owners(id) ON DELETE SET NULL;
+      ALTER TABLE hoardings ALTER COLUMN owner_name DROP NOT NULL;
+      ALTER TABLE hoardings ALTER COLUMN contact_number DROP NOT NULL;
+    `);
+
+    const { rows: unmigrated } = await pool.query(`
+      SELECT DISTINCT owner_name, contact_number 
+      FROM hoardings 
+      WHERE owner_id IS NULL AND owner_name IS NOT NULL AND owner_name != ''
+    `);
+
+    for (const row of unmigrated) {
+      const { rows: ownerRows } = await pool.query(`
+        INSERT INTO owners (name, contact_number)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING id
+      `, [row.owner_name, row.contact_number]);
+
+      let ownerId;
+      if (ownerRows.length > 0) {
+        ownerId = ownerRows[0].id;
+      } else {
+        const { rows: existingOwner } = await pool.query(`
+          SELECT id FROM owners WHERE name = $1 AND contact_number = $2
+        `, [row.owner_name, row.contact_number]);
+        if (existingOwner.length > 0) {
+          ownerId = existingOwner[0].id;
+        }
+      }
+
+      if (ownerId) {
+        await pool.query(`
+          UPDATE hoardings 
+          SET owner_id = $1 
+          WHERE owner_name = $2 AND contact_number = $3 AND owner_id IS NULL
+        `, [ownerId, row.owner_name, row.contact_number]);
+      }
+    }
+  } catch (err) {
+    console.error("Migration error:", err);
+  }
+
   console.log("✅ PostgreSQL database initialized");
 }
 
@@ -128,7 +185,22 @@ function boolToInt(val: unknown): number | undefined {
 
 function rowToHoarding(row: any) {
   if (!row) return null;
-  return { ...row, total_area: row.width * row.height, is_owned: !!row.is_owned };
+  const owner = row.owner_id ? {
+    id: row.owner_id,
+    name: row.owner_name_rel || row.owner_name || '',
+    contact_number: row.owner_contact_rel || row.contact_number || '',
+    email: row.owner_email_rel || '',
+    payment_details: row.owner_payment_rel || ''
+  } : undefined;
+
+  return {
+    ...row,
+    total_area: row.width * row.height,
+    is_owned: !!row.is_owned,
+    owner_name: row.owner_name_rel || row.owner_name || '',
+    contact_number: row.owner_contact_rel || row.contact_number || '',
+    owner
+  };
 }
 
 // ─── Auth ──────────────────────────────────────────────────────────────────────
@@ -174,31 +246,82 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     res.json(ADMIN_USER);
   }));
 
+  // ── Owners ─────────────────────────────────────────────────────────────────
+  app.get("/api/owners", requireAuth, asyncHandler(async (_req, res) => {
+    const { rows } = await pool.query("SELECT * FROM owners ORDER BY name ASC");
+    res.json(rows);
+  }));
+
+  app.get("/api/owners/:id", requireAuth, asyncHandler(async (req, res) => {
+    const { rows } = await pool.query("SELECT * FROM owners WHERE id = $1", [req.params.id]);
+    if (rows.length === 0) { res.status(404).json({ error: "Not found" }); return; }
+    res.json(rows[0]);
+  }));
+
+  app.post("/api/owners", requireAuth, asyncHandler(async (req, res) => {
+    const d = req.body;
+    const { rows } = await pool.query(`
+      INSERT INTO owners (name, contact_number, email, payment_details)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `, [d.name, d.contact_number, d.email ?? null, d.payment_details ?? null]);
+    res.status(201).json(rows[0]);
+  }));
+
+  app.put("/api/owners/:id", requireAuth, asyncHandler(async (req, res) => {
+    const d = req.body;
+    const fields = Object.keys(d).filter(k => !["id","created_at"].includes(k));
+    if (!fields.length) { res.status(400).json({ error: "No fields to update" }); return; }
+    const setClause = fields.map((f, i) => `${f} = $${i + 2}`).join(", ");
+    const values = fields.map(f => d[f]);
+    const { rows } = await pool.query(
+      `UPDATE owners SET ${setClause} WHERE id = $1 RETURNING *`,
+      [req.params.id, ...values]
+    );
+    res.json(rows[0]);
+  }));
+
+  app.delete("/api/owners/:id", requireAuth, asyncHandler(async (req, res) => {
+    await pool.query("DELETE FROM owners WHERE id = $1", [req.params.id]);
+    res.json({ ok: true });
+  }));
+
   // ── Hoardings ──────────────────────────────────────────────────────────────
   app.get("/api/hoardings", requireAuth, asyncHandler(async (_req, res) => {
-    const { rows } = await pool.query("SELECT * FROM hoardings ORDER BY created_at DESC");
+    const { rows } = await pool.query(`
+      SELECT h.*, o.name AS owner_name_rel, o.contact_number AS owner_contact_rel, o.email AS owner_email_rel, o.payment_details AS owner_payment_rel
+      FROM hoardings h
+      LEFT JOIN owners o ON h.owner_id = o.id
+      ORDER BY h.created_at DESC
+    `);
     res.json(rows.map(rowToHoarding));
   }));
 
   app.get("/api/hoardings/:id", requireAuth, asyncHandler(async (req, res) => {
-    const { rows } = await pool.query("SELECT * FROM hoardings WHERE id = $1", [req.params.id]);
+    const { rows } = await pool.query(`
+      SELECT h.*, o.name AS owner_name_rel, o.contact_number AS owner_contact_rel, o.email AS owner_email_rel, o.payment_details AS owner_payment_rel
+      FROM hoardings h
+      LEFT JOIN owners o ON h.owner_id = o.id
+      WHERE h.id = $1
+    `, [req.params.id]);
     if (rows.length === 0) { res.status(404).json({ error: "Not found" }); return; }
     res.json(rowToHoarding(rows[0]));
   }));
 
   app.post("/api/hoardings", requireAuth, asyncHandler(async (req, res) => {
     const d = req.body;
-    const { rows } = await pool.query(`
-      INSERT INTO hoardings (location, city, width, height, owner_name, contact_number, rent_amount, rent_status, last_paid_date, next_due_date, notes, latitude, longitude, is_owned, image_url)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-      RETURNING *
+    const { rows: insertRes } = await pool.query(`
+      INSERT INTO hoardings (location, city, width, height, owner_name, contact_number, owner_id, rent_amount, rent_status, last_paid_date, next_due_date, notes, latitude, longitude, is_owned, image_url)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING id
     `, [
       d.location,
       d.city ?? "Chennai",
       d.width,
       d.height,
-      d.owner_name,
-      d.contact_number,
+      d.owner_name ?? null,
+      d.contact_number ?? null,
+      d.owner_id ?? null,
       d.rent_amount,
       d.rent_status ?? "Pending",
       d.last_paid_date ?? null,
@@ -209,20 +332,34 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       boolToInt(d.is_owned) ?? 0,
       d.image_url ?? null
     ]);
+    
+    const { rows } = await pool.query(`
+      SELECT h.*, o.name AS owner_name_rel, o.contact_number AS owner_contact_rel, o.email AS owner_email_rel, o.payment_details AS owner_payment_rel
+      FROM hoardings h
+      LEFT JOIN owners o ON h.owner_id = o.id
+      WHERE h.id = $1
+    `, [insertRes[0].id]);
     res.status(201).json(rowToHoarding(rows[0]));
   }));
 
   app.put("/api/hoardings/:id", requireAuth, asyncHandler(async (req, res) => {
     const d = req.body;
-    const fields = Object.keys(d).filter(k => !["id","created_at","total_area"].includes(k));
+    const fields = Object.keys(d).filter(k => !["id","created_at","total_area","owner"].includes(k));
     if (!fields.length) { res.status(400).json({ error: "No fields to update" }); return; }
     const setClause = fields.map((f, i) => `${f} = $${i + 2}`).join(", ");
     
     const values = fields.map(f => f === "is_owned" ? boolToInt(d[f]) : d[f]);
-    const { rows } = await pool.query(
-      `UPDATE hoardings SET ${setClause} WHERE id = $1 RETURNING *`,
+    await pool.query(
+      `UPDATE hoardings SET ${setClause} WHERE id = $1`,
       [req.params.id, ...values]
     );
+
+    const { rows } = await pool.query(`
+      SELECT h.*, o.name AS owner_name_rel, o.contact_number AS owner_contact_rel, o.email AS owner_email_rel, o.payment_details AS owner_payment_rel
+      FROM hoardings h
+      LEFT JOIN owners o ON h.owner_id = o.id
+      WHERE h.id = $1
+    `, [req.params.id]);
     res.json(rowToHoarding(rows[0]));
   }));
 

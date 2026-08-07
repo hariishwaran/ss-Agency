@@ -1,11 +1,12 @@
-import { X, Camera, Upload, Trash2, MapPin, Ruler, User, FileText, Check, Scissors, Loader2 } from 'lucide-react';
+import { X, Camera, Upload, Trash2, MapPin, Ruler, User, FileText, Check, Scissors, Loader2, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { CustomDatePicker } from './ui/DatePicker';
 import { format, parseISO } from 'date-fns';
-import { Hoarding } from '../types';
+import { Hoarding, Owner } from '../types';
 import { cn } from '../utils/cn';
+import { ownerService } from '../services/ownerService';
 
 // Helper function to create a cropped image
 const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<string> => {
@@ -59,6 +60,11 @@ interface SiteModalProps {
 const rentStatusOptions: Hoarding['rent_status'][] = ['Paid', 'Pending'];
 
 export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding }: SiteModalProps) {
+  const [owners, setOwners] = useState<Owner[]>([]);
+  const [showNewOwnerForm, setShowNewOwnerForm] = useState(false);
+  const [newOwnerData, setNewOwnerData] = useState({ name: '', contact_number: '', email: '', payment_details: '' });
+  const [isSavingOwner, setIsSavingOwner] = useState(false);
+
   const [formData, setFormData] = useState<Partial<Hoarding>>({
     location: '',
     city: '',
@@ -66,6 +72,7 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
     height: 0,
     owner_name: '',
     contact_number: '',
+    owner_id: null,
     rent_amount: 0,
     rent_status: 'Pending',
     last_paid_date: '',
@@ -116,6 +123,23 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
     }
   };
 
+  const fetchOwners = async () => {
+    try {
+      const data = await ownerService.getAll();
+      setOwners(data);
+    } catch (err) {
+      console.error('Failed to load owners:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchOwners();
+      setShowNewOwnerForm(false);
+      setNewOwnerData({ name: '', contact_number: '', email: '', payment_details: '' });
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (hoarding) {
       setFormData(hoarding);
@@ -127,6 +151,7 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
         height: 0,
         owner_name: '',
         contact_number: '',
+        owner_id: null,
         rent_amount: 0,
         rent_status: 'Pending',
         last_paid_date: '',
@@ -480,38 +505,111 @@ export default function SiteModal({ isOpen, onClose, onSave, onDelete, hoarding 
                     </label>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Owner Name</label>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        required
-                        type="text"
-                        disabled={formData.is_owned}
-                        className={cn(
-                          "w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium",
-                          formData.is_owned && "opacity-60 bg-slate-100 cursor-not-allowed"
-                        )}
-                        value={formData.owner_name}
-                        onChange={(e) => setFormData({ ...formData, owner_name: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
-                    <input
-                      required={!formData.is_owned}
-                      type="text"
-                      disabled={formData.is_owned}
-                      className={cn(
-                        "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium",
-                        formData.is_owned && "opacity-60 bg-slate-100 cursor-not-allowed"
+                  {!formData.is_owned && (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center ml-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Owner</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowNewOwnerForm(!showNewOwnerForm)}
+                          className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          {showNewOwnerForm ? 'Cancel' : 'New Owner'}
+                        </button>
+                      </div>
+                      {!showNewOwnerForm ? (
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select
+                            required={!formData.is_owned}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium appearance-none"
+                            value={formData.owner_id || ''}
+                            onChange={(e) => {
+                              const val = e.target.value ? Number(e.target.value) : null;
+                              const matchedOwner = owners.find(o => o.id === val);
+                              setFormData({ 
+                                ...formData, 
+                                owner_id: val,
+                                owner_name: matchedOwner?.name || '',
+                                contact_number: matchedOwner?.contact_number || ''
+                              });
+                            }}
+                          >
+                            <option value="">-- Choose Owner --</option>
+                            {owners.map(o => (
+                              <option key={o.id} value={o.id}>{o.name} ({o.contact_number})</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">New Owner Name</label>
+                            <input
+                              type="text"
+                              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none"
+                              value={newOwnerData.name}
+                              onChange={(e) => setNewOwnerData({ ...newOwnerData, name: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
+                            <input
+                              type="text"
+                              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none"
+                              value={newOwnerData.contact_number}
+                              onChange={(e) => setNewOwnerData({ ...newOwnerData, contact_number: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email (Optional)</label>
+                            <input
+                              type="email"
+                              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none"
+                              value={newOwnerData.email}
+                              onChange={(e) => setNewOwnerData({ ...newOwnerData, email: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Payment Details (Optional)</label>
+                            <input
+                              type="text"
+                              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm outline-none"
+                              value={newOwnerData.payment_details}
+                              onChange={(e) => setNewOwnerData({ ...newOwnerData, payment_details: e.target.value })}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            disabled={isSavingOwner || !newOwnerData.name || !newOwnerData.contact_number}
+                            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition disabled:opacity-50"
+                            onClick={async () => {
+                              setIsSavingOwner(true);
+                              try {
+                                const created = await ownerService.create(newOwnerData);
+                                setOwners(prev => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+                                setFormData(prev => ({
+                                  ...prev,
+                                  owner_id: created.id,
+                                  owner_name: created.name,
+                                  contact_number: created.contact_number
+                                }));
+                                setShowNewOwnerForm(false);
+                                setNewOwnerData({ name: '', contact_number: '', email: '', payment_details: '' });
+                              } catch (err) {
+                                console.error(err);
+                              } finally {
+                                setIsSavingOwner(false);
+                              }
+                            }}
+                          >
+                            {isSavingOwner ? 'Saving...' : 'Save & Select Owner'}
+                          </button>
+                        </div>
                       )}
-                      value={formData.contact_number}
-                      onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
-                    />
-                  </div>
+                    </div>
+                  )}
 
                   {!formData.is_owned && (
                     <div className="space-y-1.5">

@@ -1,3 +1,12 @@
+export interface Owner {
+  id: number;
+  name: string;
+  contact_number: string;
+  email?: string | null;
+  payment_details?: string | null;
+  created_at?: string;
+}
+
 export interface Hoarding {
   id: number;
   location: string;
@@ -7,6 +16,8 @@ export interface Hoarding {
   total_area?: number;
   owner_name: string;
   contact_number: string;
+  owner_id?: number | null;
+  owner?: Owner;
   rent_amount: number;
   rent_status: 'Paid' | 'Pending';
   last_paid_date: string | null;
