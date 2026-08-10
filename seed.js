@@ -2,7 +2,7 @@ import pg from "pg";
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_ETNb9slRY6WA@ep-billowing-sound-aydq8obx-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  connectionString: process.env.DATABASE_URL || "postgresql://neondb_owner:npg_ETNb9slRY6WA@ep-billowing-sound-aydq8obx-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
 });
 
 const hoardingsData = [
