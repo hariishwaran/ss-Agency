@@ -78,7 +78,7 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
     const logoY = textZoneY + 0.12;
 
     slide.addImage({
-      path: '/SS%20LOGO%20.jpg.jpeg',
+      path: '/logo.png',
       x: logoX, y: logoY, w: 2.5, h: 1.5,
       sizing: { type: 'contain', w: 2.5, h: 1.5 },
     });
