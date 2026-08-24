@@ -1,60 +1,180 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
+import fs from "fs";
 
-// ─── Database Setup (In-Memory Demo Mode) ───────────────────────────────────────
-let owners: any[] = [
-  { id: 1, name: "Arun Murugan", contact_number: "+91 94431 12345", email: "arun@muruganmedia.com", payment_details: "GPay: +91 94431 12345" },
-  { id: 2, name: "K. R. Pandian", contact_number: "+91 98421 54321", email: "pandian@pandianads.com", payment_details: "HDFC A/c: 5010023491823" },
-  { id: 3, name: "Meenakshi Sundaram", contact_number: "+91 99440 98765", email: "meenakshi@sundaram.org", payment_details: "UPI: sundaram@okaxis" },
-  { id: 4, name: "S. S. Advertisers (Agency Owned)", contact_number: "N/A (Agency Owned)", email: "info@ssadvertisers.com", payment_details: "Internal" },
-  { id: 5, name: "V. Balaji", contact_number: "+91 91234 56789", email: "balaji@balajipub.com", payment_details: "GPay: +91 91234 56789" },
-  { id: 6, name: "Rajesh Kumar", contact_number: "+91 98765 43210", email: "rajesh@kumarhoardings.com", payment_details: "UPI: rajesh@okicici" },
-  { id: 7, name: "Latha Swaminathan", contact_number: "+91 94440 11223", email: "latha@swamiads.com", payment_details: "SBI A/c: 20491823091" },
-  { id: 8, name: "Suresh Pillai", contact_number: "+91 95000 88888", email: "suresh@pillaipub.com", payment_details: "GPay: +91 95000 88888" },
-  { id: 9, name: "Devi Karumariamman Trust", contact_number: "+91 98840 99999", email: "trust@devikarumari.org", payment_details: "IOB A/c: 08291029302" },
-  { id: 10, name: "P. R. Muthu", contact_number: "+91 97900 12345", email: "muthu@muthupromos.com", payment_details: "UPI: muthu@okhdfcbank" }
-];
+// ─── Database Setup (GitHub & Local File System Mode) ───────────────────────────
+const DB_PATH = path.join(process.cwd(), "data", "db.json");
 
-let hoardings: any[] = [
-  { id: 1, location: "Goripalayam AV Bridge, Madurai", city: "Madurai", width: 22, height: 30, owner_id: 1, rent_amount: 25000, rent_status: "Paid", last_paid_date: "2026-08-01", next_due_date: "2026-09-01", notes: "Premium location with high traffic", latitude: "9.9252", longitude: "78.1198", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Goripalayam%20AV%20Bridge%2022x32_1.jpg" },
-  { id: 2, location: "Kalavasal Junction Over Bridge, Madurai", city: "Madurai", width: 40, height: 25, owner_id: 2, rent_amount: 35000, rent_status: "Pending", last_paid_date: "2026-07-15", next_due_date: "2026-08-15", notes: "Visible from both sides", latitude: "9.9234", longitude: "78.0954", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kalavasal%20Guru%20Theater%20Vaigai%20Over%20Bridge%2040x25.png" },
-  { id: 3, location: "Airport Mandela Nagar Junction, Madurai", city: "Madurai", width: 60, height: 30, owner_id: 3, rent_amount: 45000, rent_status: "Paid", last_paid_date: "2026-08-05", next_due_date: "2026-09-05", notes: "Main airport approach road", latitude: "9.8345", longitude: "78.0912", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Mandela%20Nagar%20Junction%2060x30.png" },
-  { id: 4, location: "Anna Nagar Suguna Stores, Madurai", city: "Madurai", width: 20, height: 30, owner_id: 4, rent_amount: 0, rent_status: "Paid", last_paid_date: "", next_due_date: "", notes: "Agency owned hoarding, zero rent cost", latitude: "9.9189", longitude: "78.1402", is_owned: 1, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Suguna%20Stores%2020x30.jpg" },
-  { id: 5, location: "Mattuthavani Bus Stand Opp Saravana Stores, Madurai", city: "Madurai", width: 47, height: 28, owner_id: 5, rent_amount: 30000, rent_status: "Pending", last_paid_date: "2026-07-01", next_due_date: "2026-08-01", notes: "Very crowded area, commercial zone", latitude: "9.9401", longitude: "78.1565", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Mattuthavani%20Bus%20Stand%20Nr%20Saravana%20Stores%2047x28.png" },
-  { id: 6, location: "Railway Station Over Bridge, Chennai", city: "Chennai", width: 30, height: 20, owner_id: 6, rent_amount: 50000, rent_status: "Paid", last_paid_date: "2026-08-10", next_due_date: "2026-09-10", notes: "Located near Central Station", latitude: "13.0827", longitude: "80.2707", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kamarajar%20Salai%2070x30_1.jpg" },
-  { id: 7, location: "Gandhipuram Signal, Coimbatore", city: "Coimbatore", width: 45, height: 20, owner_id: 7, rent_amount: 40000, rent_status: "Pending", last_paid_date: "2026-07-20", next_due_date: "2026-08-20", notes: "Prime commercial junction in Coimbatore", latitude: "11.0168", longitude: "76.9558", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Coimbatore%20Karanampettai%2060x25.jpg" },
-  { id: 8, location: "Tirunelveli Junction Arch, Tirunelveli", city: "Tirunelveli", width: 50, height: 25, owner_id: 8, rent_amount: 28000, rent_status: "Paid", last_paid_date: "2026-08-03", next_due_date: "2026-09-03", notes: "Excellent visibility at entry arch", latitude: "8.7284", longitude: "77.6891", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20Junction%2050x25.jpg" },
-  { id: 9, location: "Vilakkuthoon Junction, Madurai", city: "Madurai", width: 30, height: 30, owner_id: 9, rent_amount: 18000, rent_status: "Paid", last_paid_date: "2026-08-01", next_due_date: "2026-09-01", notes: "Historical trade hub, retail crowd", latitude: "9.9154", longitude: "78.1251", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Signal%2030x30.jpg" },
-  { id: 10, location: "Sethupathi School Simmakkal, Madurai", city: "Madurai", width: 45, height: 28, owner_id: 10, rent_amount: 22000, rent_status: "Pending", last_paid_date: "2026-07-10", next_due_date: "2026-08-10", notes: "Near busy Simmakkal market area", latitude: "9.9231", longitude: "78.1228", is_owned: 0, image_url: "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sethupathi%20School%20Simmakkal%2045x28.jpg" }
-];
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_OWNER = process.env.GITHUB_OWNER || "hariishwaran";
+const GITHUB_REPO = process.env.GITHUB_REPO || "ss-Agency";
+const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
+const GITHUB_FILE_PATH = "data/db.json";
 
-let campaigns: any[] = [
-  { id: 1, client_info: "HDFC Bank Home Loan", start_date: "2026-08-01", end_date: "2026-09-30", hoarding_id: 1, internal_notes: "Regular campaign, monthly inspection required", po_status: "paid", total_po_amount: 120000, paid_po_amount: 120000, created_at: new Date().toISOString() },
-  { id: 2, client_info: "Airtel 5G Plus Launch", start_date: "2026-08-15", end_date: "2026-11-15", hoarding_id: 2, internal_notes: "Visible display priority", po_status: "partial", total_po_amount: 240000, paid_po_amount: 80000, created_at: new Date().toISOString() },
-  { id: 3, client_info: "Joyalukkas Onam Festive Sale", start_date: "2026-08-10", end_date: "2026-09-10", hoarding_id: 3, internal_notes: "Festive banners", po_status: "pending", total_po_amount: 90000, paid_po_amount: 0, created_at: new Date().toISOString() },
-  { id: 4, client_info: "TVS Raider 125 Promo", start_date: "2026-08-01", end_date: "2026-08-31", hoarding_id: 4, internal_notes: "Agency-owned hoarding promo", po_status: "none", total_po_amount: 0, paid_po_amount: 0, created_at: new Date().toISOString() },
-  { id: 5, client_info: "Saravana Stores Aadi Discount", start_date: "2026-07-15", end_date: "2026-08-15", hoarding_id: 5, internal_notes: "Discount campaign next to store", po_status: "paid", total_po_amount: 150000, paid_po_amount: 150000, created_at: new Date().toISOString() },
-  { id: 6, client_info: "Pothys Deepavali Celebration", start_date: "2026-09-01", end_date: "2026-10-31", hoarding_id: 6, internal_notes: "Pre-bookings for festive season", po_status: "pending", total_po_amount: 300000, paid_po_amount: 0, created_at: new Date().toISOString() },
-  { id: 7, client_info: "Tata EV Punch Launch", start_date: "2026-08-20", end_date: "2026-10-20", hoarding_id: 7, internal_notes: "Focus on clean energy marketing", po_status: "partial", total_po_amount: 180000, paid_po_amount: 90000, created_at: new Date().toISOString() },
-  { id: 8, client_info: "Preethi Zodiac Mixer Grinder", start_date: "2026-08-05", end_date: "2026-09-05", hoarding_id: 8, internal_notes: "Kitchen appliances promotion", po_status: "paid", total_po_amount: 85000, paid_po_amount: 85000, created_at: new Date().toISOString() },
-  { id: 9, client_info: "Aasan Classes IIT-JEE Admissions", start_date: "2026-05-01", end_date: "2026-08-31", hoarding_id: 9, internal_notes: "Educational season hoarding", po_status: "paid", total_po_amount: 200000, paid_po_amount: 200000, created_at: new Date().toISOString() },
-  { id: 10, client_info: "Apollo Hospitals Healthcare Checkup", start_date: "2026-08-12", end_date: "2026-09-12", hoarding_id: 10, internal_notes: "Medical checkup packages promotion", po_status: "none", total_po_amount: 0, paid_po_amount: 0, created_at: new Date().toISOString() }
-];
+interface DatabaseState {
+  owners: any[];
+  hoardings: any[];
+  campaigns: any[];
+  purchase_orders: any[];
+  ledger: any[];
+  flex_printing: any[];
+}
 
-let purchase_orders: any[] = [
-  { id: "po-1", campaign_id: 1, hoarding_id: 1, po_number: "PO-HDFC-2026-001", po_date: "2026-08-01", vendor_name: "HDFC Bank Ltd", description: "Home Loan Promotion on Goripalayam Hoarding", total_amount: 120000, paid_amount: 120000, balance_amount: 0, status: "paid", payment_terms: "Due on Receipt", due_date: "2026-08-15", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "po-2", campaign_id: 2, hoarding_id: 2, po_number: "PO-AIRTEL-2026-015", po_date: "2026-08-15", vendor_name: "Bharti Airtel Ltd", description: "5G Launch on Kalavasal Junction", total_amount: 240000, paid_amount: 80000, balance_amount: 160000, status: "partial", payment_terms: "Net 30", due_date: "2026-09-15", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-];
+let owners: any[] = [];
+let hoardings: any[] = [];
+let campaigns: any[] = [];
+let purchase_orders: any[] = [];
+let ledger: any[] = [];
+let flex_printing: any[] = [];
 
-let ledger: any[] = [
-  { id: "ledger-1", hoarding_id: 1, campaign_id: 1, po_id: "po-1", amount_paid: 120000, payment_date: "2026-08-05", period_covered: "Aug - Sept 2026", payment_method: "Bank Transfer", receipt_url: null, transaction_type: "po_payment", reference_number: "TXN10293021", created_at: new Date().toISOString() },
-  { id: "ledger-2", hoarding_id: 2, campaign_id: 2, po_id: "po-2", amount_paid: 80000, payment_date: "2026-08-20", period_covered: "First Month Advance", payment_method: "UPI", receipt_url: null, transaction_type: "po_payment", reference_number: "TXN992019", created_at: new Date().toISOString() }
-];
+let dbCache: DatabaseState | null = null;
 
-let flex_printing: any[] = [
-  { id: 1, campaign_id: 1, hoarding_id: 1, printing_type: "own_printing", flex_size: "22x30 ft", quantity: 1, notes: "Matte finish", status: "completed", vendor_name: null, vendor_contact: null, assignment_date: "2026-07-28", expected_completion: "2026-07-31", outsource_status: null, outsource_cost: 0, material_cost: 4500, labor_cost: 1500, total_cost: 6000, payment_status: "paid", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 2, campaign_id: 2, hoarding_id: 2, printing_type: "outsource", flex_size: "40x25 ft", quantity: 1, notes: "Glossy print", status: "in_progress", vendor_name: "Bright Flex Printers", vendor_contact: "9843210928", assignment_date: "2026-08-16", expected_completion: "2026-08-20", outsource_status: "in_progress", outsource_cost: 8500, material_cost: 0, labor_cost: 0, total_cost: 0, payment_status: "pending", created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-];
+const asyncHandler =
+  (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
+  (req: Request, res: Response, next: NextFunction) =>
+    fn(req, res, next).catch(next);
+
+async function loadDb(): Promise<DatabaseState> {
+  if (dbCache) {
+    return dbCache;
+  }
+
+  if (GITHUB_TOKEN) {
+    try {
+      console.log("Loading database from GitHub API...");
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      });
+      if (res.ok) {
+        const data = await res.json() as any;
+        const decoded = Buffer.from(data.content, "base64").toString("utf-8");
+        dbCache = JSON.parse(decoded);
+        console.log("✅ Database loaded successfully from GitHub");
+        return dbCache!;
+      } else {
+        console.error(`Failed to load db from GitHub (${res.status}): ${res.statusText}`);
+      }
+    } catch (err: any) {
+      console.error("Error loading db from GitHub, falling back to local file:", err.message);
+    }
+  }
+
+  // Fallback to local file system
+  try {
+    console.log("Loading database from local disk...");
+    const content = fs.readFileSync(DB_PATH, "utf-8");
+    dbCache = JSON.parse(content);
+    console.log("✅ Database loaded successfully from disk");
+    return dbCache!;
+  } catch (err: any) {
+    console.error("Error loading db from disk:", err.message);
+    dbCache = {
+      owners: [],
+      hoardings: [],
+      campaigns: [],
+      purchase_orders: [],
+      ledger: [],
+      flex_printing: []
+    };
+    return dbCache!;
+  }
+}
+
+async function saveDb(state: DatabaseState): Promise<void> {
+  dbCache = state;
+  const jsonString = JSON.stringify(state, null, 2);
+
+  // Write locally if not in Vercel environment (or as a fallback)
+  if (!process.env.VERCEL) {
+    try {
+      fs.writeFileSync(DB_PATH, jsonString, "utf-8");
+      console.log("✅ Database saved to local disk");
+    } catch (err: any) {
+      console.error("Failed to save database to local disk:", err.message);
+    }
+  }
+
+  // Push to GitHub if GITHUB_TOKEN is present
+  if (GITHUB_TOKEN) {
+    try {
+      console.log("Saving database to GitHub API...");
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+      
+      const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      });
+
+      let sha: string | undefined;
+      if (getFileRes.ok) {
+        const metadata = await getFileRes.json() as any;
+        sha = metadata.sha;
+      }
+
+      const putRes = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "db: update database [skip ci]",
+          content: Buffer.from(jsonString).toString("base64"),
+          sha,
+          branch: GITHUB_BRANCH,
+        }),
+      });
+
+      if (putRes.ok) {
+        console.log("✅ Database committed successfully to GitHub");
+      } else {
+        const errDetail = await putRes.text();
+        console.error(`Failed to commit database to GitHub (${putRes.status}): ${errDetail}`);
+      }
+    } catch (err: any) {
+      console.error("Error committing database to GitHub:", err.message);
+    }
+  }
+}
+
+let isSaving = false;
+let saveQueue: DatabaseState[] = [];
+
+async function queueSave() {
+  const state = { owners, hoardings, campaigns, purchase_orders, ledger, flex_printing };
+  if (isSaving) {
+    saveQueue.push(state);
+    return;
+  }
+  isSaving = true;
+  try {
+    await saveDb(state);
+  } finally {
+    isSaving = false;
+    if (saveQueue.length > 0) {
+      saveQueue.shift();
+      saveQueue = [];
+      queueSave();
+    }
+  }
+}
+
+async function initDbState() {
+  const db = await loadDb();
+  owners = db.owners || [];
+  hoardings = db.hoardings || [];
+  campaigns = db.campaigns || [];
+  purchase_orders = db.purchase_orders || [];
+  ledger = db.ledger || [];
+  flex_printing = db.flex_printing || [];
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function genUUID(): string {
@@ -93,10 +213,11 @@ const ADMIN_USER = { id: "local-admin", email: ADMIN_EMAIL, name: "Admin" };
 const app = express();
 app.use(express.json({ limit: "10mb" }));
 
-const asyncHandler =
-  (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
-  (req: Request, res: Response, next: NextFunction) =>
-    fn(req, res, next).catch(next);
+// Ensure database state is loaded before processing requests
+app.use(asyncHandler(async (_req, _res, next) => {
+  await initDbState();
+  next();
+}));
 
 // ── Auth middleware ────────────────────────────────────────────────────────
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -151,6 +272,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       created_at: new Date().toISOString()
     };
     owners.push(newOwner);
+    await queueSave();
     res.status(201).json(newOwner);
   }));
 
@@ -165,6 +287,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       ...d,
       id // retain original id
     };
+    await queueSave();
     res.json(owners[index]);
   }));
 
@@ -176,6 +299,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
         h.owner_id = null;
       }
     });
+    await queueSave();
     res.json({ ok: true });
   }));
 
@@ -215,6 +339,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       created_at: new Date().toISOString()
     };
     hoardings.push(newHoarding);
+    await queueSave();
     res.status(201).json(rowToHoarding(newHoarding));
   }));
 
@@ -239,6 +364,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       ...cleanFields,
       id // retain original id
     };
+    await queueSave();
     res.json(rowToHoarding(hoardings[index]));
   }));
 
@@ -249,6 +375,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     campaigns = campaigns.filter(c => c.hoarding_id !== id);
     flex_printing = flex_printing.filter(fp => fp.hoarding_id !== id);
     purchase_orders = purchase_orders.filter(po => po.hoarding_id !== id);
+    await queueSave();
     res.json({ ok: true });
   }));
 
@@ -286,6 +413,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       created_at: new Date().toISOString()
     };
     campaigns.push(newCampaign);
+    await queueSave();
     res.status(201).json(newCampaign);
   }));
 
@@ -304,6 +432,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       ...cleanFields,
       id
     };
+    await queueSave();
     res.json(campaigns[index]);
   }));
 
@@ -313,6 +442,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     purchase_orders = purchase_orders.filter(po => po.campaign_id !== id);
     ledger = ledger.filter(l => l.campaign_id !== id);
     flex_printing = flex_printing.filter(fp => fp.campaign_id !== id);
+    await queueSave();
     res.json({ ok: true });
   }));
 
@@ -338,6 +468,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     campaigns[campaignIndex].total_po_amount = totalAmount;
     campaigns[campaignIndex].paid_po_amount = paidAmount;
 
+    await queueSave();
     res.json(campaigns[campaignIndex]);
   }));
 
@@ -381,6 +512,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       updated_at: new Date().toISOString()
     };
     purchase_orders.push(newPO);
+    await queueSave();
     res.status(201).json(newPO);
   }));
 
@@ -399,11 +531,13 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       updated_at: new Date().toISOString(),
       id: req.params.id
     };
+    await queueSave();
     res.json(purchase_orders[index]);
   }));
 
   app.delete("/api/purchase_orders/:id", requireAuth, asyncHandler(async (req, res) => {
     purchase_orders = purchase_orders.filter(po => po.id !== req.params.id);
+    await queueSave();
     res.json({ ok: true });
   }));
 
@@ -431,11 +565,13 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       created_at: new Date().toISOString()
     };
     ledger.push(newEntry);
+    await queueSave();
     res.status(201).json(newEntry);
   }));
 
   app.delete("/api/ledger/:id", requireAuth, asyncHandler(async (req, res) => {
     ledger = ledger.filter(l => l.id !== req.params.id);
+    await queueSave();
     res.json({ ok: true });
   }));
 
@@ -478,6 +614,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
       updated_at: new Date().toISOString()
     };
     flex_printing.push(newOrder);
+    await queueSave();
     res.status(201).json(newOrder);
   }));
 
@@ -502,18 +639,20 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     updatedOrder.total_cost = (updatedOrder.material_cost ? Number(updatedOrder.material_cost) : 0) + (updatedOrder.labor_cost ? Number(updatedOrder.labor_cost) : 0);
 
     flex_printing[index] = updatedOrder;
+    await queueSave();
     res.json(updatedOrder);
   }));
 
   app.delete("/api/flex_printing/:id", requireAuth, asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     flex_printing = flex_printing.filter(fp => fp.id !== id);
+    await queueSave();
     res.json({ ok: true });
   }));
 
   // ── Health ────────────────────────────────────────────────────────────────
   app.get("/api/health", asyncHandler(async (_req, res) => {
-    res.json({ status: "ok", db: "in-memory-mock" });
+    res.json({ status: "ok", db: GITHUB_TOKEN ? "github" : "local-disk" });
   }));
 
   // Serve location images
