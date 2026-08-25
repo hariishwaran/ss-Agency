@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNotifications } from '../context/NotificationContext';
+import { useSearch } from '../context/SearchContext';
 import { useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2, TrendingUp, Image as ImageIcon, ChevronRight, Activity } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -9,12 +10,19 @@ import { AppNotification } from '../types';
 
 export default function Notifications() {
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
+  const { searchQuery } = useSearch();
   const [filter, setFilter] = useState<'all' | 'campaign' | 'operational' | 'financial'>('all');
   const navigate = useNavigate();
 
-  const filteredNotifications = notifications.filter(
-    (n) => filter === 'all' || n.type === filter
-  );
+  const filteredNotifications = notifications.filter((n) => {
+    const matchesFilter = filter === 'all' || n.type === filter;
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = !query ||
+      n.title.toLowerCase().includes(query) ||
+      n.message.toLowerCase().includes(query) ||
+      n.type.toLowerCase().includes(query);
+    return matchesFilter && matchesSearch;
+  });
 
   const renderIcon = (type: string) => {
     switch (type) {
@@ -158,8 +166,12 @@ export default function Notifications() {
              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-6">
                 <CheckCircle2 className="w-8 h-8 text-slate-300" strokeWidth={1.5} />
              </div>
-             <h3 className="text-lg font-bold text-slate-900 mb-2">You're all caught up</h3>
-             <p className="text-slate-500">No new notifications in this category.</p>
+             <h3 className="text-lg font-bold text-slate-900 mb-2">
+               {searchQuery ? 'No matching notifications' : "You're all caught up"}
+             </h3>
+             <p className="text-slate-500">
+               {searchQuery ? `No notifications found matching "${searchQuery}".` : 'No new notifications in this category.'}
+             </p>
           </motion.div>
         )}
       </div>
