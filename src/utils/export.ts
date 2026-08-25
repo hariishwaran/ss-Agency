@@ -31,12 +31,12 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
     const slide = pptx.addSlide();
     slide.background = { color: 'FFFFFF' };
 
-    // ── Hero image (~80% of slide area) ──
+    // ── Hero image (~75% of slide area, leaving plenty of footer room) ──
     const margin = 0.3;
     const imgX = margin;
     const imgY = margin;
     const imgW = W - 2 * margin; // 9.4
-    const imgH = 5.8;
+    const imgH = 5.3;
 
     if (slideData.imageUrl) {
       try {
@@ -56,25 +56,25 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
     }
 
     // ── Bottom info zone ──
-    const textZoneY = imgY + imgH + 0.15; // 6.25
+    const textZoneY = 5.85;
 
-    // Left: Location & Dimensions — Serif (Times New Roman), Bold, 22pt
+    // Left: Location & Dimensions — Serif (Times New Roman), Bold, 24pt
     slide.addText([
-      { text: slideData.location, options: { fontSize: 22, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
+      { text: slideData.location, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
       { text: '  ', options: { fontSize: 10 } },
-      { text: slideData.dimensions, options: { fontSize: 22, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
+      { text: slideData.dimensions, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
     ], {
       x: margin, 
-      y: textZoneY, 
-      w: 6.8, 
-      h: 0.8,
+      y: textZoneY + 0.15, 
+      w: 6.4, 
+      h: 1.1,
       valign: 'middle',
     });
 
-    // ── Right: Agency Logo (aligned cleanly within slide boundaries) ──
-    const logoW = 2.2;
-    const logoH = 0.8;
-    const logoX = W - margin - logoW; // 7.5
+    // ── Right: Agency Logo (Natural 1.66 ratio: 2.4" x 1.44" for bold, un-shrunk logo) ──
+    const logoW = 2.4;
+    const logoH = 1.44;
+    const logoX = W - margin - logoW; // 7.3
     const logoY = textZoneY;
 
     slide.addImage({
