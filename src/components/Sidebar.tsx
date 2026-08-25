@@ -26,7 +26,7 @@ const bottomItems = [
 export default function Sidebar() {
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col z-50">
-      <div className="h-20 flex items-center justify-center py-2 px-4 my-2">
+      <div className="h-20 flex items-center justify-start px-8 my-2">
         <img src="/logo.png" alt="SS Advertisers" className="h-14 w-auto object-contain" />
       </div>
       
