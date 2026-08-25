@@ -26,22 +26,28 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
   pptx.defineLayout({ name: 'STANDARD', width: 10, height: 7.5 });
   pptx.layout = 'STANDARD';
   const W = 10;
-  const H = 7.5;
 
   slides.forEach((slideData) => {
     const slide = pptx.addSlide();
     slide.background = { color: 'FFFFFF' };
 
-    // ── Hero image with white border (~85% of slide area) ──
-    const margin = 0.25;
+    // ── Hero image (~80% of slide area) ──
+    const margin = 0.3;
     const imgX = margin;
     const imgY = margin;
-    const imgW = W - 2 * margin;
-    const imgH = H - 1.2 - margin;
+    const imgW = W - 2 * margin; // 9.4
+    const imgH = 5.8;
 
     if (slideData.imageUrl) {
       try {
-        slide.addImage({ path: slideData.imageUrl, x: imgX, y: imgY, w: imgW, h: imgH, sizing: { type: 'cover', w: imgW, h: imgH } });
+        slide.addImage({ 
+          path: slideData.imageUrl, 
+          x: imgX, 
+          y: imgY, 
+          w: imgW, 
+          h: imgH, 
+          sizing: { type: 'cover', w: imgW, h: imgH } 
+        });
       } catch {
         slide.addShape(pptx.ShapeType.rect, { x: imgX, y: imgY, w: imgW, h: imgH, fill: { color: 'E2E8F0' } });
       }
@@ -49,38 +55,35 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
       slide.addShape(pptx.ShapeType.rect, { x: imgX, y: imgY, w: imgW, h: imgH, fill: { color: 'E2E8F0' } });
     }
 
-    // ── Red bounding box (#FF0000) 1px stroke isolating the billboard ──
-    const boxX = imgX + 0.5;
-    const boxY = imgY + 0.3;
-    const boxW = 2.0;
-    const boxH = 1.4;
-    slide.addShape(pptx.ShapeType.rect, {
-      x: boxX, y: boxY, w: boxW, h: boxH,
-      line: { color: 'FF0000', width: 1.5 },
-      fill: { type: 'none' },
-    });
+    // ── Bottom info zone ──
+    const textZoneY = imgY + imgH + 0.15; // 6.25
 
-    // ── Bottom text zone (white background below image) ──
-    const textZoneY = imgY + imgH;
-
-    // Left: Location — Serif (Times New Roman), Bold, 24pt, Deep Charcoal #1A1A1A
+    // Left: Location & Dimensions — Serif (Times New Roman), Bold, 22pt
     slide.addText([
-      { text: slideData.location, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
+      { text: slideData.location, options: { fontSize: 22, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
       { text: '  ', options: { fontSize: 10 } },
-      { text: slideData.dimensions, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
+      { text: slideData.dimensions, options: { fontSize: 22, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
     ], {
-      x: 0.5, y: textZoneY + 0.2, w: 6.5, h: 0.65,
+      x: margin, 
+      y: textZoneY, 
+      w: 6.8, 
+      h: 0.8,
       valign: 'middle',
     });
 
-    // ── Right: Agency Logo (bottom-right corner) ──
-    const logoX = 7.0;
-    const logoY = textZoneY + 0.12;
+    // ── Right: Agency Logo (aligned cleanly within slide boundaries) ──
+    const logoW = 2.2;
+    const logoH = 0.8;
+    const logoX = W - margin - logoW; // 7.5
+    const logoY = textZoneY;
 
     slide.addImage({
       path: '/logo.png',
-      x: logoX, y: logoY, w: 2.5, h: 1.5,
-      sizing: { type: 'contain', w: 2.5, h: 1.5 },
+      x: logoX, 
+      y: logoY, 
+      w: logoW, 
+      h: logoH,
+      sizing: { type: 'contain', w: logoW, h: logoH },
     });
   });
 
