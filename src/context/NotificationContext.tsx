@@ -71,7 +71,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 type: 'financial',
                 severity: 'red',
                 title: 'Rent Overdue',
-                message: `Payment for ${h.location} is overdue since ${h.next_due_date}.`,
+                message: `Payment for Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is overdue since ${h.next_due_date}.`,
                 date: now.toISOString(),
                 read: false,
                 action_link: `/details/${h.id}`
@@ -82,7 +82,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 type: 'financial',
                 severity: 'yellow',
                 title: 'Rent Due Soon',
-                message: `Rent for ${h.location} is due in ${diffDays} days.`,
+                message: `Rent for Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is due in ${diffDays} days.`,
                 date: now.toISOString(),
                 read: false,
                 action_link: `/details/${h.id}`
@@ -190,7 +190,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             type: 'campaign',
             severity: 'yellow',
             title: 'Site Vacant',
-            message: `${h.location} is currently unlisted. Priority for sales.`,
+            message: `Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is currently unlisted. Priority for sales.`,
             date: now.toISOString(),
             read: false,
             action_link: `/inventory`
@@ -205,7 +205,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         simulatedMessages: [...prevAppState.simulatedMessages, ...newSimulatedMessages]
       };
 
-      const allGeneratedNotifications = [...baseNotifications, ...appStateRef.current.simulatedMessages];
+      const rawNotifications = [...baseNotifications, ...appStateRef.current.simulatedMessages];
+      
+      // Strict Deduplication by Notification ID
+      const uniqueMap = new Map<string, AppNotification>();
+      rawNotifications.forEach(n => {
+        if (!uniqueMap.has(n.id)) {
+          uniqueMap.set(n.id, n);
+        }
+      });
+      const allGeneratedNotifications = Array.from(uniqueMap.values());
 
       setNotifications(prev => {
         let savedState: Record<string, boolean> = {};
@@ -217,7 +226,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const readStatusMap = new Map(prev.map(n => [n.id, n.read]));
         return allGeneratedNotifications.map(n => ({
           ...n,
-          read: savedState[n.id] ?? readStatusMap.has(n.id) ? readStatusMap.get(n.id)! : n.read
+          read: savedState[n.id] !== undefined ? savedState[n.id] : (readStatusMap.has(n.id) ? readStatusMap.get(n.id)! : n.read)
         })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       });
     } catch (error) {
