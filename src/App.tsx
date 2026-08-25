@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Inventory = lazy(() => import('./pages/Inventory'));
+const Owners = lazy(() => import('./pages/Owners'));
 const Campaigns = lazy(() => import('./pages/Campaigns'));
 const CampaignDetails = lazy(() => import('./pages/CampaignDetails'));
 const SiteDetails = lazy(() => import('./pages/SiteDetails'));
@@ -54,6 +55,7 @@ export default function App() {
                 <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
                   <Route index element={<Dashboard />} />
                   <Route path="inventory" element={<Inventory />} />
+                  <Route path="owners" element={<Owners />} />
                   <Route path="campaigns" element={<Campaigns />} />
                   <Route path="campaigns/:id" element={<CampaignDetails />} />
                   <Route path="details/:id" element={<SiteDetails />} />

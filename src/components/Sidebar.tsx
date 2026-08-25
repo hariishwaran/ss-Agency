@@ -6,13 +6,15 @@ import {
   Settings, 
   HelpCircle,
   BarChart3,
-  Printer
+  Printer,
+  Users
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Package, label: 'Inventory', path: '/inventory' },
+  { icon: Users, label: 'Owners', path: '/owners' },
   { icon: Printer, label: 'Flex Printing', path: '/flex-printing' },
   { icon: BarChart3, label: 'Campaigns', path: '/campaigns' },
   { icon: Wallet, label: 'Ledger', path: '/ledger' },
