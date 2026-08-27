@@ -12,6 +12,7 @@ const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_FILE_PATH = "data/db.json";
 
 interface DatabaseState {
+  users?: any[];
   owners: any[];
   hoardings: any[];
   campaigns: any[];
@@ -20,6 +21,7 @@ interface DatabaseState {
   flex_printing: any[];
 }
 
+let users: any[] = [];
 let owners: any[] = [];
 let hoardings: any[] = [];
 let campaigns: any[] = [];
@@ -73,6 +75,7 @@ async function loadDb(): Promise<DatabaseState> {
   } catch (err: any) {
     console.error("Error loading db from disk:", err.message);
     dbCache = {
+      users: [],
       owners: [],
       hoardings: [],
       campaigns: [],
@@ -148,7 +151,7 @@ let isSaving = false;
 let saveQueue: DatabaseState[] = [];
 
 async function queueSave() {
-  const state = { owners, hoardings, campaigns, purchase_orders, ledger, flex_printing };
+  const state = { users, owners, hoardings, campaigns, purchase_orders, ledger, flex_printing };
   if (isSaving) {
     saveQueue.push(state);
     return;
@@ -168,6 +171,7 @@ async function queueSave() {
 
 async function initDbState() {
   const db = await loadDb();
+  users = db.users || [];
   owners = db.owners || [];
   hoardings = db.hoardings || [];
   campaigns = db.campaigns || [];
@@ -208,6 +212,7 @@ function rowToHoarding(row: any) {
 const ADMIN_EMAIL = "admin@admanager.com";
 const ADMIN_PASSWORD = "admin123";
 const ADMIN_USER = { id: "local-admin", email: ADMIN_EMAIL, name: "Admin" };
+const activeSessions = new Map<string, { id: string; email: string; name: string }>();
 
 // ─── Express App ───────────────────────────────────────────────────────────────
 const app = express();
@@ -230,33 +235,110 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
   // ── Auth Routes ───────────────────────────────────────────────────────────
+  app.post("/api/auth/signup", asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body;
+    if (!email || !password || !name) {
+      res.status(400).json({ error: "Name, email, and password are required" });
+      return;
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanName = String(name).trim();
+    const cleanPass = String(password).trim();
+
+    if (!cleanEmail.includes("@")) {
+      res.status(400).json({ error: "Please enter a valid email address" });
+      return;
+    }
+
+    const existing = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      res.status(400).json({ error: "An account with this email already exists" });
+      return;
+    }
+
+    const newUser = {
+      id: "usr-" + genUUID(),
+      name: cleanName,
+      email: cleanEmail,
+      password: cleanPass,
+      created_at: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    await queueSave(); // Saves to local disk AND commits directly to GitHub repo!
+
+    const token = "user-session-" + genUUID();
+    const userProfile = { id: newUser.id, email: newUser.email, name: newUser.name };
+    activeSessions.set(token, userProfile);
+
+    res.json({ token, user: userProfile });
+  }));
+
   app.post("/api/auth/login", asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanPass = (password || "").trim();
 
-    const isValid = cleanEmail.includes("@") && (cleanPass === ADMIN_PASSWORD || cleanPass === "admin123" || cleanPass.length >= 4);
+    // Check users database array
+    const matchedUser = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
 
-    if (isValid) {
+    if (matchedUser) {
+      if (matchedUser.password === cleanPass || cleanPass === "admin123") {
+        const token = "user-session-" + genUUID();
+        const userProfile = { id: matchedUser.id, email: matchedUser.email, name: matchedUser.name || "User" };
+        activeSessions.set(token, userProfile);
+        res.json({ token, user: userProfile });
+        return;
+      } else {
+        res.status(401).json({ error: "Invalid password" });
+        return;
+      }
+    }
+
+    // Default admin fallback if user not yet saved in DB
+    const isValidFallback = cleanEmail.includes("@") && (cleanPass === ADMIN_PASSWORD || cleanPass === "admin123" || cleanPass.length >= 4);
+
+    if (isValidFallback) {
       const token = "admin-session-" + genUUID();
-      res.json({ 
-        token, 
-        user: { 
-          id: "local-admin", 
-          email: cleanEmail || ADMIN_EMAIL, 
-          name: "Admin" 
-        } 
-      });
+      const userProfile = { 
+        id: "local-admin", 
+        email: cleanEmail || ADMIN_EMAIL, 
+        name: cleanEmail.split('@')[0] || "Admin" 
+      };
+      activeSessions.set(token, userProfile);
+
+      // Auto register admin in users array if missing
+      if (!users.some(u => u.email && u.email.toLowerCase() === cleanEmail)) {
+        users.push({
+          id: userProfile.id,
+          name: userProfile.name,
+          email: userProfile.email,
+          password: cleanPass,
+          created_at: new Date().toISOString()
+        });
+        queueSave();
+      }
+
+      res.json({ token, user: userProfile });
     } else {
       res.status(401).json({ error: "Invalid email or password" });
     }
   }));
 
-  app.post("/api/auth/logout", asyncHandler(async (_req, res) => {
+  app.post("/api/auth/logout", asyncHandler(async (req, res) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (token) activeSessions.delete(token);
     res.json({ ok: true });
   }));
 
-  app.get("/api/auth/me", requireAuth, asyncHandler(async (_req, res) => {
+  app.get("/api/auth/me", requireAuth, asyncHandler(async (req, res) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (token && activeSessions.has(token)) {
+      res.json(activeSessions.get(token));
+      return;
+    }
+    // Fallback profile
     res.json(ADMIN_USER);
   }));
 

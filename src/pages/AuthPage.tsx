@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function AuthPage() {
-  const [email, setEmail] = useState('admin@admanager.com');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('admin@gmail.com');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,21 +25,24 @@ export default function AuthPage() {
     setLoading(true);
     setError(null);
 
+    const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/login';
+    const payload = isSignUp ? { name, email, password } : { email, password };
+
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Invalid email or password');
+        throw new Error(data.error || 'Authentication failed');
       }
 
       const { token } = await res.json();
       localStorage.setItem('auth_token', token);
-      // Navigate and reload to re-check auth
+      // Reload page to initiate authenticated app session
       window.location.href = '/';
     } catch (err: any) {
       setError(err.message);
@@ -60,21 +65,44 @@ export default function AuthPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="backdrop-blur-xl bg-white/60 border border-white/40 rounded-[40px] shadow-2xl p-10 flex flex-col items-center">
+        <div className="backdrop-blur-xl bg-white/60 border border-white/40 rounded-[40px] shadow-2xl p-8 sm:p-10 flex flex-col items-center">
           <div className="w-16 h-16 bg-white/80 rounded-2xl shadow-inner flex items-center justify-center mb-6 border border-white/50">
-            <LogIn className="w-8 h-8 text-slate-800" />
+            {isSignUp ? (
+              <UserPlus className="w-8 h-8 text-slate-800" />
+            ) : (
+              <LogIn className="w-8 h-8 text-slate-800" />
+            )}
           </div>
 
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Sign in</h1>
-          <p className="text-slate-500 text-sm mb-8">AdManager Executive Suite</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            {isSignUp ? 'Create Account' : 'Sign in'}
+          </h1>
+          <p className="text-slate-500 text-sm mb-6">
+            {isSignUp ? 'Sign up for SS Advertisers Executive Suite' : 'AdManager Executive Suite'}
+          </p>
 
           <form onSubmit={handleAuth} className="w-full space-y-4">
+            {/* Full Name field for Sign Up */}
+            {isSignUp && (
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-14 pl-12 pr-4 transition-all duration-200 bg-white/50 focus:bg-white rounded-2xl border border-white/20 focus:border-indigo-500 outline-none placeholder:text-slate-400 text-slate-800 font-medium"
+                />
+              </div>
+            )}
+
             {/* Email */}
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder="Email Address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -103,9 +131,11 @@ export default function AuthPage() {
             </div>
 
             {/* Hint */}
-            <p className="text-xs text-slate-400 text-center">
-              Default: admin@gmail.com or admin@admanager.com / admin123
-            </p>
+            {!isSignUp && (
+              <p className="text-xs text-slate-400 text-center">
+                Default: admin@gmail.com or admin@admanager.com / admin123
+              </p>
+            )}
 
             {error && (
               <div className="bg-red-50 border border-red-100 p-4 rounded-2xl w-full">
@@ -122,12 +152,28 @@ export default function AuthPage() {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Get Started
+                  {isSignUp ? 'Create Account' : 'Get Started'}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
           </form>
+
+          {/* Toggle between Sign In and Sign Up */}
+          <div className="mt-6 pt-4 border-t border-slate-200/50 w-full text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
+              className="text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
+            >
+              {isSignUp
+                ? 'Already have an account? Sign in'
+                : "Don't have an account? Sign up"}
+            </button>
+          </div>
         </div>
       </motion.div>
 
