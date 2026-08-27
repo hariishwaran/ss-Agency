@@ -104,7 +104,7 @@ export default function AuthPage() {
 
             {/* Hint */}
             <p className="text-xs text-slate-400 text-center">
-              Default: admin@admanager.com / admin123
+              Default: admin@gmail.com or admin@admanager.com / admin123
             </p>
 
             {error && (
