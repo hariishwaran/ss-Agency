@@ -1,4 +1,4 @@
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import { useSearch } from '../context/SearchContext';
@@ -9,12 +9,17 @@ import { cn } from '../utils/cn';
 export default function TopBar() {
   const { unreadCount } = useNotifications();
   const { searchQuery, setSearchQuery } = useSearch();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const fullName = (user as any)?.name || user?.email?.split('@')[0] || 'User';
   const initials = fullName.charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = '/auth';
+  };
 
   // Clear search query when changing routes
   useEffect(() => {
@@ -56,16 +61,23 @@ export default function TopBar() {
           </button>
         </div>
         
-        <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
+        <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
           <div className="text-right hidden md:block">
             <p className="text-sm font-bold text-slate-900">{fullName}</p>
             <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
               Site Admin
             </p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-sm border-2 border-slate-100 shadow-sm ring-1 ring-slate-200 hover:bg-slate-800 transition-colors cursor-pointer">
+          <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-sm border-2 border-slate-100 shadow-sm ring-1 ring-slate-200 hover:bg-slate-800 transition-colors">
             {initials}
           </div>
+          <button
+            onClick={handleLogout}
+            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shrink-0"
+            title="Sign Out"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>

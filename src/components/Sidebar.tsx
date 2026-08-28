@@ -7,9 +7,11 @@ import {
   HelpCircle,
   BarChart3,
   Printer,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -26,6 +28,13 @@ const bottomItems = [
 ];
 
 export default function Sidebar() {
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = '/auth';
+  };
+
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col z-50">
       <div className="h-20 flex items-center justify-start px-8 my-2">
@@ -52,7 +61,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="pt-4 border-t border-slate-100 space-y-1">
+      <div className="pt-4 border-t border-slate-100 space-y-1 mb-4">
         {bottomItems.map((item) => (
           <NavLink
             key={item.path}
@@ -68,6 +77,14 @@ export default function Sidebar() {
             <span>{item.label}</span>
           </NavLink>
         ))}
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-600 hover:bg-red-50 text-sm font-medium group"
+        >
+          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <span>Sign Out</span>
+        </button>
       </div>
       </div>
     </aside>
