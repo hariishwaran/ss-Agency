@@ -47,7 +47,8 @@ export default function Inventory() {
     { id: 'id', label: 'ID' },
     { id: 'location', label: 'Location' },
     { id: 'city', label: 'City' },
-    { id: 'size', label: 'Size (Dimensions)' },
+    { id: 'width', label: 'Width (ft)' },
+    { id: 'height', label: 'Height (ft)' },
     { id: 'owner_name', label: 'Owner Name' },
     { id: 'contact_number', label: 'Primary Contact' },
     { id: 'rent_amount', label: 'Monthly Rent' },
@@ -64,7 +65,8 @@ export default function Inventory() {
     id: true,
     location: true,
     city: true,
-    size: true,
+    width: true,
+    height: true,
     owner_name: true,
     contact_number: true,
     rent_amount: true,
@@ -211,7 +213,8 @@ export default function Inventory() {
       if (selectedExcelFields.id) row['ID'] = h.id;
       if (selectedExcelFields.location) row['Location'] = h.location;
       if (selectedExcelFields.city) row['City'] = h.city || 'Chennai';
-      if (selectedExcelFields.size) row['Size'] = `${h.width} x ${h.height} ft`;
+      if (selectedExcelFields.width) row['Width (ft)'] = h.width;
+      if (selectedExcelFields.height) row['Height (ft)'] = h.height;
       if (selectedExcelFields.owner_name) row['Owner'] = h.is_owned ? 'SS Advertisers (Agency)' : h.owner_name;
       if (selectedExcelFields.contact_number) row['Contact'] = h.is_owned ? 'N/A' : h.contact_number;
       if (selectedExcelFields.rent_amount) row['Rent'] = h.is_owned ? 0 : h.rent_amount;

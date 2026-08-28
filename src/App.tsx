@@ -63,8 +63,6 @@ export default function App() {
                   <Route path="ledger" element={<Ledger />} />
                   <Route path="flex-printing" element={<FlexPrinting />} />
                   <Route path="notifications" element={<Notifications />} />
-                  <Route path="settings" element={<div className="p-10 text-center"><h1 className="text-3xl font-bold">Settings</h1><p className="mt-4">Settings configuration coming soon.</p></div>} />
-                  <Route path="help" element={<div className="p-10 text-center"><h1 className="text-3xl font-bold">Help Center</h1><p className="mt-4">Support is just a call away.</p></div>} />
                 </Route>
               </Routes>
             </Suspense>
