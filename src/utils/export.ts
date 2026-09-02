@@ -47,67 +47,142 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
   const pptx = new PptxGenJS();
   pptx.defineLayout({ name: 'STANDARD', width: 10, height: 7.5 });
   pptx.layout = 'STANDARD';
-  const W = 10;
+
+  const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : '/logo.png';
 
   sortedSlides.forEach((slideData) => {
     const slide = pptx.addSlide();
     slide.background = { color: 'FFFFFF' };
 
-    // ── Hero image (~75% of slide area, leaving plenty of footer room) ──
-    const margin = 0.3;
-    const imgX = margin;
-    const imgY = margin;
-    const imgW = W - 2 * margin; // 9.4
-    const imgH = 5.3;
+    // ── 1. Top Picture Frame (Dashed Border Box) ──
+    const picFrameX = 0.3;
+    const picFrameY = 0.3;
+    const picFrameW = 9.4;
+    const picFrameH = 6.1;
+
+    slide.addShape(pptx.ShapeType.rect, {
+      x: picFrameX,
+      y: picFrameY,
+      w: picFrameW,
+      h: picFrameH,
+      fill: { color: 'FFFFFF' },
+      line: { color: '7F7F7F', width: 0.75, dashType: 'dash' },
+    });
+
+    // Top-left label text inside Picture frame
+    slide.addText(slideData.location || 'Picture', {
+      x: picFrameX + 0.1,
+      y: picFrameY + 0.1,
+      w: 8.0,
+      h: 0.4,
+      fontFace: 'Times New Roman',
+      fontSize: 18,
+      color: '000000',
+      valign: 'top',
+    });
+
+    // Hoarding Image (centered inside Picture Frame)
+    const imgX = picFrameX + 0.1;
+    const imgY = picFrameY + 0.55;
+    const imgW = picFrameW - 0.2; // 9.2
+    const imgH = picFrameH - 0.65; // 5.45
 
     if (slideData.imageUrl) {
       try {
-        slide.addImage({ 
-          path: slideData.imageUrl, 
-          x: imgX, 
-          y: imgY, 
-          w: imgW, 
-          h: imgH, 
-          sizing: { type: 'cover', w: imgW, h: imgH } 
+        let fullImgUrl = slideData.imageUrl;
+        if (fullImgUrl.startsWith('/') && typeof window !== 'undefined') {
+          fullImgUrl = `${window.location.origin}${fullImgUrl}`;
+        }
+        slide.addImage({
+          path: fullImgUrl,
+          x: imgX,
+          y: imgY,
+          w: imgW,
+          h: imgH,
+          sizing: { type: 'contain', w: imgW, h: imgH },
         });
       } catch {
-        slide.addShape(pptx.ShapeType.rect, { x: imgX, y: imgY, w: imgW, h: imgH, fill: { color: 'E2E8F0' } });
+        slide.addShape(pptx.ShapeType.rect, {
+          x: imgX,
+          y: imgY,
+          w: imgW,
+          h: imgH,
+          fill: { color: 'F1F5F9' },
+        });
       }
     } else {
-      slide.addShape(pptx.ShapeType.rect, { x: imgX, y: imgY, w: imgW, h: imgH, fill: { color: 'E2E8F0' } });
+      slide.addShape(pptx.ShapeType.rect, {
+        x: imgX,
+        y: imgY,
+        w: imgW,
+        h: imgH,
+        fill: { color: 'F1F5F9' },
+      });
     }
 
-    // ── Bottom info zone ──
-    const textZoneY = 5.85;
+    // ── 2. Bottom Title & Logo Frame (Dashed Border Box) ──
+    const bottomFrameX = 0.3;
+    const bottomFrameY = 6.5;
+    const bottomFrameW = 9.4;
+    const bottomFrameH = 0.7;
 
-    // Left: Location & Dimensions — Serif (Times New Roman), Bold, 24pt
-    slide.addText([
-      { text: slideData.location, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
-      { text: '  ', options: { fontSize: 10 } },
-      { text: slideData.dimensions, options: { fontSize: 24, bold: true, color: '1A1A1A', fontFace: 'Times New Roman' } },
-    ], {
-      x: margin, 
-      y: textZoneY + 0.15, 
-      w: 6.4, 
-      h: 1.1,
+    slide.addShape(pptx.ShapeType.rect, {
+      x: bottomFrameX,
+      y: bottomFrameY,
+      w: bottomFrameW,
+      h: bottomFrameH,
+      fill: { color: 'FFFFFF' },
+      line: { color: '7F7F7F', width: 0.75, dashType: 'dash' },
+    });
+
+    // Bottom Left Text (Times New Roman, Bold)
+    const titleText = slideData.dimensions 
+      ? `${slideData.location} (${slideData.dimensions})` 
+      : slideData.location;
+
+    slide.addText(titleText, {
+      x: bottomFrameX + 0.15,
+      y: bottomFrameY,
+      w: 6.8,
+      h: bottomFrameH,
+      fontFace: 'Times New Roman',
+      fontSize: 18,
+      bold: true,
+      color: '000000',
       valign: 'middle',
     });
 
-    // ── Right: Agency Logo (Natural 1.66 ratio: 2.4" x 1.44" for bold, un-shrunk logo) ──
-    const logoW = 2.4;
-    const logoH = 1.44;
-    const logoX = W - margin - logoW; // 7.3
-    const logoY = textZoneY;
+    // Bottom Right Logo (S.S. ADVERTISERS logo)
+    const logoW = 2.2;
+    const logoH = 0.65;
+    const logoX = bottomFrameX + bottomFrameW - logoW - 0.05; // 7.45
+    const logoY = bottomFrameY + (bottomFrameH - logoH) / 2;
 
-    slide.addImage({
-      path: '/logo.png',
-      x: logoX, 
-      y: logoY, 
-      w: logoW, 
-      h: logoH,
-      sizing: { type: 'contain', w: logoW, h: logoH },
-    });
+    try {
+      slide.addImage({
+        path: logoUrl,
+        x: logoX,
+        y: logoY,
+        w: logoW,
+        h: logoH,
+        sizing: { type: 'contain', w: logoW, h: logoH },
+      });
+    } catch {
+      slide.addText('S.S. ADVERTISERS', {
+        x: logoX,
+        y: logoY,
+        w: logoW,
+        h: logoH,
+        fontFace: 'Times New Roman',
+        fontSize: 12,
+        bold: true,
+        color: '008000',
+        align: 'right',
+        valign: 'middle',
+      });
+    }
   });
 
   pptx.writeFile({ fileName: `${filename}.pptx` });
 };
+
