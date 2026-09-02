@@ -38,6 +38,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const newSimulatedMessages: AppNotification[] = [];
       const prevAppState = appStateRef.current;
 
+      // Helper to retrieve persistent creation date for notifications
+      let createdDatesMap: Record<string, string> = {};
+      try {
+        const storedDates = localStorage.getItem('app_notifications_created_dates');
+        if (storedDates) createdDatesMap = JSON.parse(storedDates);
+      } catch (e) {}
+
+      const getOrSetCreatedDate = (id: string, fallbackIso: string): string => {
+        if (createdDatesMap[id]) {
+          return createdDatesMap[id];
+        }
+        createdDatesMap[id] = fallbackIso;
+        try {
+          localStorage.setItem('app_notifications_created_dates', JSON.stringify(createdDatesMap));
+        } catch (e) {}
+        return fallbackIso;
+      };
+
       // 1. Financial Reminders (Landlord/Owner Payouts)
       hoardings.forEach(h => {
         currentHoardingStatus[h.id] = h.rent_status;
@@ -47,13 +65,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             prevAppState.hoardingStatus[h.id] !== h.rent_status && 
             h.rent_status === 'Paid') {
             console.log(`[SIMULATED TRIGGER] WhatsApp/Email sent to Owner of Site #${h.id} (${h.location}) - Rent Status is now 'Paid'`);
+            const simId = `sim-msg-hoarding-${h.id}-${now.getTime()}`;
             newSimulatedMessages.push({
-              id: `sim-msg-hoarding-${h.id}-${now.getTime()}`,
+              id: simId,
               type: 'financial',
               severity: 'green',
               title: 'Simulated Notification',
               message: `WhatsApp/Email simulated to Owner: Rent for ${h.location} marked as Paid.`,
-              date: now.toISOString(),
+              date: getOrSetCreatedDate(simId, now.toISOString()),
               read: false,
               action_link: `/details/${h.id}`
             });
@@ -66,24 +85,28 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
           if (h.rent_status === 'Pending') {
             if (diffDays < 0) {
+              const notifId = `fin-overdue-${h.id}`;
+              const fallbackDate = new Date(dueDate.getTime()).toISOString();
               baseNotifications.push({
-                id: `fin-overdue-${h.id}`,
+                id: notifId,
                 type: 'financial',
                 severity: 'red',
                 title: 'Rent Overdue',
                 message: `Payment for Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is overdue since ${h.next_due_date}.`,
-                date: now.toISOString(),
+                date: getOrSetCreatedDate(notifId, fallbackDate),
                 read: false,
                 action_link: `/details/${h.id}`
               });
             } else if (diffDays <= 7) {
+              const notifId = `fin-upcoming-${h.id}`;
+              const fallbackDate = new Date(now.getTime() - 2 * 3600000).toISOString();
               baseNotifications.push({
-                id: `fin-upcoming-${h.id}`,
+                id: notifId,
                 type: 'financial',
                 severity: 'yellow',
                 title: 'Rent Due Soon',
                 message: `Rent for Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is due in ${diffDays} days.`,
-                date: now.toISOString(),
+                date: getOrSetCreatedDate(notifId, fallbackDate),
                 read: false,
                 action_link: `/details/${h.id}`
               });
@@ -111,38 +134,60 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             prevAppState.campaignStatus[c.id] && 
             prevAppState.campaignStatus[c.id] !== status) {
             console.log(`[SIMULATED TRIGGER] WhatsApp/Email sent to Client (${c.client_info}) - Campaign #${c.id} status changed to ${status}`);
+            const simId = `sim-msg-campaign-${c.id}-${now.getTime()}`;
             newSimulatedMessages.push({
-              id: `sim-msg-campaign-${c.id}-${now.getTime()}`,
+              id: simId,
               type: 'campaign',
               severity: 'green',
               title: 'Simulated Notification',
               message: `WhatsApp/Email simulated to Client: ${c.client_info} campaign is now ${status}.`,
-              date: now.toISOString(),
+              date: getOrSetCreatedDate(simId, now.toISOString()),
               action_link: `/campaigns`,
               read: false
             });
         }
 
-        if (endDiffDays > 0 && endDiffDays <= 14) {
-          if (endDiffDays <= 14 && endDiffDays >= 7) {
+        // Campaign Ended notification
+        if (endDiffDays <= 0) {
+          const notifId = `camp-ended-${c.id}`;
+          const fallbackDate = endDate.getTime() < now.getTime() 
+            ? endDate.toISOString() 
+            : new Date(now.getTime() - 3 * 3600000).toISOString();
+
+          baseNotifications.push({
+            id: notifId,
+            type: 'campaign',
+            severity: 'red',
+            title: 'Campaign Ended',
+            message: `${c.client_info} campaign at Site #${c.hoarding_id} has ended (${c.end_date}). Dismantle vinyl & mark site available for sales.`,
+            date: getOrSetCreatedDate(notifId, fallbackDate),
+            action_link: `/campaigns`,
+            read: false
+          });
+        } else if (endDiffDays > 0 && endDiffDays <= 14) {
+          if (endDiffDays >= 7) {
+            const notifId = `camp-renewal-alert-${c.id}`;
+            const fallbackDate = new Date(now.getTime() - 5 * 3600000).toISOString();
             baseNotifications.push({
-              id: `camp-renewal-alert-${c.id}`,
+              id: notifId,
               type: 'campaign',
               severity: 'yellow',
               title: 'Sales Renewal Alert',
               message: `${c.client_info} campaign at Site #${c.hoarding_id} ends in ${endDiffDays} days. Alert Sales Team for renewal/new advertiser.`,
-              date: now.toISOString(),
+              date: getOrSetCreatedDate(notifId, fallbackDate),
               action_link: `/campaigns`,
               read: false
             });
           } else {
+            const notifId = `camp-expire-${c.id}`;
+            const fallbackDate = new Date(now.getTime() - 2 * 3600000).toISOString();
             baseNotifications.push({
-              id: `camp-expire-${c.id}`,
+              id: notifId,
               type: 'campaign',
               severity: 'red',
               title: 'Campaign Expiring Soon',
               message: `${c.client_info} campaign at Site #${c.hoarding_id} ends in ${endDiffDays} days.`,
-              date: now.toISOString(),
+              date: getOrSetCreatedDate(notifId, fallbackDate),
               action_link: `/campaigns`,
               read: false
             });
@@ -150,26 +195,30 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         }
 
         if (startDiffDays >= -1 && startDiffDays <= 0) {
+          const notifId = `camp-proof-${c.id}`;
+          const fallbackDate = new Date(startDate.getTime()).toISOString();
           baseNotifications.push({
-            id: `camp-proof-${c.id}`,
+            id: notifId,
             type: 'operational',
             severity: 'red',
             title: 'Proof of Posting Required',
             message: `Upload launch day photo for ${c.client_info} at Site #${c.hoarding_id}.`,
-            date: now.toISOString(),
+            date: getOrSetCreatedDate(notifId, fallbackDate),
             read: false,
             action_link: `/campaigns`
           });
         }
 
         if (startDiffDays > 0 && startDiffDays <= 2) {
+          const notifId = `camp-launch-${c.id}`;
+          const fallbackDate = new Date(now.getTime() - 4 * 3600000).toISOString();
           baseNotifications.push({
-            id: `camp-launch-${c.id}`,
+            id: notifId,
             type: 'operational',
             severity: 'yellow',
             title: 'Launch Preparation',
             message: `Prepare vinyl for ${c.client_info} launching in ${startDiffDays} days.`,
-            date: now.toISOString(),
+            date: getOrSetCreatedDate(notifId, fallbackDate),
             read: false,
             action_link: `/inventory`
           });
@@ -185,13 +234,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       hoardings.forEach(h => {
         if (!occupiedHoardingIds.has(h.id)) {
+           const notifId = `camp-vacant-${h.id}`;
+           // Stagger vacant site creation dates for realistic representation
+           const fallbackDate = new Date(now.getTime() - (h.id * 7200000 + 3600000)).toISOString();
            baseNotifications.push({
-            id: `camp-vacant-${h.id}`,
+            id: notifId,
             type: 'campaign',
             severity: 'yellow',
             title: 'Site Vacant',
             message: `Site #${h.id} (${h.location} - ${h.width}x${h.height} ft) is currently unlisted. Priority for sales.`,
-            date: now.toISOString(),
+            date: getOrSetCreatedDate(notifId, fallbackDate),
             read: false,
             action_link: `/inventory`
           });

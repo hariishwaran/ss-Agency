@@ -1,11 +1,11 @@
-import { X, Calendar, User, MapPin, Check, FileText, Clock, Loader2, Trash2, Search, ChevronDown } from 'lucide-react';
+import { X, Calendar, User, MapPin, Check, FileText, Clock, Loader2, Trash2, Search, ChevronDown, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useMemo } from 'react';
 import { Campaign, Hoarding } from '../types';
 import { CustomDatePicker } from './ui/DatePicker';
 import { format, parseISO } from 'date-fns';
 import { cn } from '../utils/cn';
-import { calculateDays } from '../utils/date';
+import { calculateDays, isPast, isFuture } from '../utils/date';
 import { hoardingService } from '../services/hoardingService';
 
 interface CampaignModalProps {
@@ -24,6 +24,7 @@ interface FormDataState {
   end_date: string;
   hoarding_ids: number[];
   internal_notes: string;
+  po_status: 'none' | 'pending' | 'partial' | 'paid';
 }
 
 export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onDelete, campaign, initialHoardingId }: CampaignModalProps) {
@@ -33,6 +34,7 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
     end_date: '',
     hoarding_ids: [],
     internal_notes: '',
+    po_status: 'none',
   });
   const [hoardings, setHoardings] = useState<Hoarding[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +47,20 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
     const citySet = new Set(hoardings.map(h => h.city).filter((c): c is string => Boolean(c)));
     return Array.from(citySet).sort();
   }, [hoardings]);
+
+  // Selected hoarding object
+  const selectedSite = useMemo(() => {
+    if (formData.hoarding_ids.length === 0) return null;
+    return hoardings.find(h => h.id === formData.hoarding_ids[0]) || null;
+  }, [hoardings, formData.hoarding_ids]);
+
+  // Calculated campaign status
+  const campaignStatus = useMemo(() => {
+    if (!formData.start_date || !formData.end_date) return null;
+    if (isPast(formData.end_date)) return 'past';
+    if (isFuture(formData.start_date)) return 'upcoming';
+    return 'active';
+  }, [formData.start_date, formData.end_date]);
 
   // Filter hoardings based on search query and city
   const filteredHoardings = useMemo(() => {
@@ -80,6 +96,7 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
           end_date: campaign.end_date,
           hoarding_ids: campaign.hoarding_id ? [campaign.hoarding_id] : [],
           internal_notes: campaign.internal_notes || '',
+          po_status: campaign.po_status || 'none',
         });
       } else {
         setFormData({
@@ -88,6 +105,7 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
           end_date: '',
           hoarding_ids: initialHoardingId ? [initialHoardingId] : [],
           internal_notes: '',
+          po_status: 'none',
         });
       }
     }
@@ -128,7 +146,8 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
           start_date: formData.start_date,
           end_date: formData.end_date,
           hoarding_id: formData.hoarding_ids[0],
-          internal_notes: formData.internal_notes
+          internal_notes: formData.internal_notes,
+          po_status: formData.po_status,
         });
       } else {
         // We pass the formData containing hoarding_ids to onCreate
@@ -158,7 +177,7 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h3 className="text-xl font-bold text-slate-900 tracking-tight">
-                  {campaign ? 'Edit Campaign' : 'New Campaign'}
+                  {campaign ? 'Edit Campaign Details' : 'New Campaign'}
                 </h3>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Strategic Placement</p>
               </div>
@@ -212,14 +231,55 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
                   </div>
                 </div>
 
+                {/* Status & Details Overview */}
                 {formData.start_date && formData.end_date && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-xl animate-in fade-in slide-in-from-top-1 duration-300">
-                    <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                    <span className="text-[10px] font-bold text-indigo-900 uppercase tracking-widest">
-                      Total Duration: {calculateDays(formData.start_date!, formData.end_date!)} Days
-                    </span>
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Campaign Status</span>
+                      {campaignStatus && (
+                        <span className={cn(
+                          "px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-widest",
+                          campaignStatus === 'active' ? "bg-emerald-500 text-white" :
+                          campaignStatus === 'upcoming' ? "bg-blue-500 text-white" :
+                          "bg-slate-500 text-white"
+                        )}>
+                          {campaignStatus}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duration</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                        {calculateDays(formData.start_date, formData.end_date)} Days
+                      </span>
+                    </div>
+                    {selectedSite && (
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asset Type / Rent</span>
+                        <span>{selectedSite.is_owned ? 'Owned Asset' : `₹${(selectedSite.rent_amount || 0).toLocaleString('en-IN')}`}</span>
+                      </div>
+                    )}
                   </div>
                 )}
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">PO Status</label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <select
+                      value={formData.po_status}
+                      onChange={(e) => setFormData({ ...formData, po_status: e.target.value as any })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium text-slate-800 capitalize appearance-none"
+                    >
+                      <option value="none">None / Pending PO</option>
+                      <option value="pending">Pending</option>
+                      <option value="partial">Partial</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Internal Notes (Private)</label>

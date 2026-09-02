@@ -208,7 +208,15 @@ export default function Inventory() {
       return;
     }
 
-    const data = filteredHoardings.map(h => {
+    const sortedHoardings = [...filteredHoardings].sort((a, b) => {
+      const cityA = (a.city || 'Chennai').trim();
+      const cityB = (b.city || 'Chennai').trim();
+      const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+      if (cityComp !== 0) return cityComp;
+      return (a.location || '').localeCompare(b.location || '', undefined, { sensitivity: 'base' });
+    });
+
+    const data = sortedHoardings.map(h => {
       const row: Record<string, any> = {};
       if (selectedExcelFields.id) row['ID'] = h.id;
       if (selectedExcelFields.location) row['Location'] = h.location;
@@ -232,7 +240,15 @@ export default function Inventory() {
   };
 
   const handleExportPPT = () => {
-    const slides = filteredHoardings.map(h => ({
+    const sortedHoardings = [...filteredHoardings].sort((a, b) => {
+      const cityA = (a.city || 'Chennai').trim();
+      const cityB = (b.city || 'Chennai').trim();
+      const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+      if (cityComp !== 0) return cityComp;
+      return (a.location || '').localeCompare(b.location || '', undefined, { sensitivity: 'base' });
+    });
+
+    const slides = sortedHoardings.map(h => ({
       imageUrl: h.image_url || '',
       location: h.location,
       city: h.city,

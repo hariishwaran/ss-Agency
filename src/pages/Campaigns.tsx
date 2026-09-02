@@ -185,7 +185,18 @@ export default function Campaigns() {
       return;
     }
 
-    const data = filteredCampaigns.map(c => {
+    const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
+      const cityA = (hoardings[a.hoarding_id]?.city || 'Chennai').trim();
+      const cityB = (hoardings[b.hoarding_id]?.city || 'Chennai').trim();
+      const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+      if (cityComp !== 0) return cityComp;
+
+      const locA = hoardings[a.hoarding_id]?.location || '';
+      const locB = hoardings[b.hoarding_id]?.location || '';
+      return locA.localeCompare(locB, undefined, { sensitivity: 'base' });
+    });
+
+    const data = sortedCampaigns.map(c => {
       const site = hoardings[c.hoarding_id];
       const row: Record<string, any> = {};
       if (selectedExcelFields.id) row['ID'] = c.id;
@@ -210,7 +221,18 @@ export default function Campaigns() {
   };
 
   const handleExportPPT = () => {
-    const slides = filteredCampaigns.map(c => ({
+    const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
+      const cityA = (hoardings[a.hoarding_id]?.city || 'Chennai').trim();
+      const cityB = (hoardings[b.hoarding_id]?.city || 'Chennai').trim();
+      const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+      if (cityComp !== 0) return cityComp;
+
+      const locA = hoardings[a.hoarding_id]?.location || '';
+      const locB = hoardings[b.hoarding_id]?.location || '';
+      return locA.localeCompare(locB, undefined, { sensitivity: 'base' });
+    });
+
+    const slides = sortedCampaigns.map(c => ({
       imageUrl: hoardings[c.hoarding_id]?.image_url || '',
       location: hoardings[c.hoarding_id]?.location || 'Unknown',
       city: hoardings[c.hoarding_id]?.city,
@@ -287,18 +309,16 @@ export default function Campaigns() {
             <div key={i} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
               <div className="p-5 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="w-16 h-3 bg-slate-100 rounded animate-pulse" />
-                    <div className="w-24 h-5 bg-slate-100 rounded animate-pulse" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="w-16 h-3 bg-slate-100 rounded animate-pulse" />
-                    <div className="w-24 h-5 bg-slate-100 rounded animate-pulse" />
-                  </div>
+                <div className="space-y-2">
+                  <div className="w-16 h-3 bg-slate-100 rounded animate-pulse" />
+                  <div className="w-36 h-5 bg-slate-100 rounded animate-pulse" />
+                </div>
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="w-16 h-3 bg-slate-100 rounded animate-pulse" />
+                  <div className="w-28 h-4 bg-slate-100 rounded animate-pulse" />
                 </div>
               </div>
-              <div className="px-5 py-4 border-t border-slate-100 flex gap-3">
+              <div className="px-5 py-4 border-t border-slate-100 flex items-center justify-between">
                 <div className="w-6 h-6 bg-slate-100 rounded animate-pulse" />
                 <div className="w-6 h-6 bg-slate-100 rounded animate-pulse" />
               </div>
@@ -309,9 +329,7 @@ export default function Campaigns() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {filteredCampaigns.map((campaign) => {
-              const status = getStatus(campaign.start_date, campaign.end_date);
               const site = hoardings[campaign.hoarding_id];
-              const durationDays = calculateDays(campaign.start_date, campaign.end_date);
 
               return (
                 <motion.div
@@ -323,7 +341,7 @@ export default function Campaigns() {
                   onClick={() => navigate('/campaigns/' + campaign.id)}
                   className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all group cursor-pointer flex flex-col"
                 >
-                  {/* Hero Image with Overlay */}
+                  {/* Hero Image */}
                   <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
                     <img
                       src={site?.image_url || 'https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?q=80&w=2070&auto=format&fit=crop'}
@@ -331,73 +349,21 @@ export default function Campaigns() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       referrerPolicy="no-referrer"
                     />
+                  </div>
 
-                    {/* Status Badge */}
-                    <div className="absolute top-4 left-4 z-10 flex gap-2">
-                      <div className={cn(
-                        "px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest",
-                        status === 'active' ? "bg-emerald-500 text-white" :
-                        status === 'upcoming' ? "bg-blue-500 text-white" :
-                        "bg-slate-500 text-white"
-                      )}>
-                        <span className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          status === 'active' ? "bg-emerald-200" :
-                          status === 'upcoming' ? "bg-blue-200" :
-                          "bg-slate-300"
-                        )} />
-                        {status}
-                      </div>
-                      {campaign.po_status && campaign.po_status !== 'none' && (
-                        <div className={cn(
-                          "px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest",
-                          campaign.po_status === 'paid' ? "bg-emerald-500 text-white" :
-                          campaign.po_status === 'partial' ? "bg-amber-500 text-white" :
-                          "bg-slate-500 text-white"
-                        )}>
-                          PO: {campaign.po_status}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Bottom gradient overlay with campaign name */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-16">
-                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">
-                        {campaign.client_info.split(' ').slice(0, 2).join(' ').toUpperCase()}
-                      </p>
-                      <h3 className="text-lg font-bold text-white leading-tight line-clamp-1">
+                  {/* Name & Location Section */}
+                  <div className="p-5 flex-1 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Campaign</p>
+                      <h3 className="text-base font-bold text-slate-900 leading-tight line-clamp-2">
                         {campaign.client_info}
                       </h3>
                     </div>
-                  </div>
-
-                  {/* Details Section - 2x2 grid */}
-                  <div className="p-5 flex-1">
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</p>
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
-                          <p className="text-sm font-bold text-slate-800 truncate">{site?.location || 'Unknown'}</p>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Period</p>
-                        <p className="text-sm font-bold text-slate-800">
-                          {format(parseISO(campaign.start_date), 'MMM dd')} - {format(parseISO(campaign.end_date), 'MMM dd')}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duration</p>
-                        <p className="text-sm font-bold text-slate-800">{durationDays} Days</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          {site?.is_owned ? 'Type' : 'Rent'}
-                        </p>
-                        <p className="text-sm font-bold text-slate-800">
-                          {site?.is_owned ? 'Owned Asset' : `₹${(site?.rent_amount || 0).toLocaleString('en-IN')}`}
-                        </p>
+                    <div className="pt-2 border-t border-slate-100">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Location</p>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+                        <p className="text-sm font-semibold text-slate-700 truncate">{site?.location || 'Unknown'}</p>
                       </div>
                     </div>
                   </div>
@@ -419,7 +385,8 @@ export default function Campaigns() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Notes view action
+                          setEditingCampaign(campaign);
+                          setIsModalOpen(true);
                         }}
                         className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all"
                         title="Notes"

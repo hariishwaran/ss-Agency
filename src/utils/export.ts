@@ -2,7 +2,19 @@ import * as XLSX from 'xlsx';
 import PptxGenJS from 'pptxgenjs';
 
 export const exportToExcel = (data: any[], filename: string) => {
-  const ws = XLSX.utils.json_to_sheet(data);
+  // Sort data by City (A-Z), then Location (A-Z) if fields exist
+  const sortedData = [...data].sort((a, b) => {
+    const cityA = String(a['City'] || a['city'] || 'Chennai').trim();
+    const cityB = String(b['City'] || b['city'] || 'Chennai').trim();
+    const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+    if (cityComp !== 0) return cityComp;
+
+    const locA = String(a['Location'] || a['location'] || '').trim();
+    const locB = String(b['Location'] || b['location'] || '').trim();
+    return locA.localeCompare(locB, undefined, { sensitivity: 'base' });
+  });
+
+  const ws = XLSX.utils.json_to_sheet(sortedData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
   XLSX.writeFile(wb, `${filename}.xlsx`);
@@ -22,12 +34,22 @@ interface SlideData {
 }
 
 export const exportToPPT = (slides: SlideData[], filename: string) => {
+  // Sort slides by City (A-Z), then Location (A-Z)
+  const sortedSlides = [...slides].sort((a, b) => {
+    const cityA = (a.city || 'Chennai').trim();
+    const cityB = (b.city || 'Chennai').trim();
+    const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
+    if (cityComp !== 0) return cityComp;
+
+    return (a.location || '').localeCompare(b.location || '', undefined, { sensitivity: 'base' });
+  });
+
   const pptx = new PptxGenJS();
   pptx.defineLayout({ name: 'STANDARD', width: 10, height: 7.5 });
   pptx.layout = 'STANDARD';
   const W = 10;
 
-  slides.forEach((slideData) => {
+  sortedSlides.forEach((slideData) => {
     const slide = pptx.addSlide();
     slide.background = { color: 'FFFFFF' };
 
