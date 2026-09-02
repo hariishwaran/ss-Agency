@@ -54,38 +54,11 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
     const slide = pptx.addSlide();
     slide.background = { color: 'FFFFFF' };
 
-    // ── 1. Top Picture Frame (Dashed Border Box) ──
-    const picFrameX = 0.3;
-    const picFrameY = 0.3;
-    const picFrameW = 9.4;
-    const picFrameH = 6.1;
-
-    slide.addShape(pptx.ShapeType.rect, {
-      x: picFrameX,
-      y: picFrameY,
-      w: picFrameW,
-      h: picFrameH,
-      fill: { color: 'FFFFFF' },
-      line: { color: '7F7F7F', width: 0.75, dashType: 'dash' },
-    });
-
-    // Top-left label text inside Picture frame
-    slide.addText(slideData.location || 'Picture', {
-      x: picFrameX + 0.1,
-      y: picFrameY + 0.1,
-      w: 8.0,
-      h: 0.4,
-      fontFace: 'Times New Roman',
-      fontSize: 18,
-      color: '000000',
-      valign: 'top',
-    });
-
-    // Hoarding Image (centered inside Picture Frame)
-    const imgX = picFrameX + 0.1;
-    const imgY = picFrameY + 0.55;
-    const imgW = picFrameW - 0.2; // 9.2
-    const imgH = picFrameH - 0.65; // 5.45
+    // ── 1. Top Image Container (Fills top area without header text or borders) ──
+    const imgX = 0.3;
+    const imgY = 0.3;
+    const imgW = 9.4;
+    const imgH = 6.0;
 
     if (slideData.imageUrl) {
       try {
@@ -120,20 +93,11 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
       });
     }
 
-    // ── 2. Bottom Title & Logo Frame (Dashed Border Box) ──
+    // ── 2. Bottom Title & Logo Section (No border box) ──
     const bottomFrameX = 0.3;
-    const bottomFrameY = 6.5;
+    const bottomFrameY = 6.45;
     const bottomFrameW = 9.4;
-    const bottomFrameH = 0.7;
-
-    slide.addShape(pptx.ShapeType.rect, {
-      x: bottomFrameX,
-      y: bottomFrameY,
-      w: bottomFrameW,
-      h: bottomFrameH,
-      fill: { color: 'FFFFFF' },
-      line: { color: '7F7F7F', width: 0.75, dashType: 'dash' },
-    });
+    const bottomFrameH = 0.75;
 
     // Bottom Left Text (Times New Roman, Bold)
     const titleText = slideData.dimensions 
@@ -141,7 +105,7 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
       : slideData.location;
 
     slide.addText(titleText, {
-      x: bottomFrameX + 0.15,
+      x: bottomFrameX,
       y: bottomFrameY,
       w: 6.8,
       h: bottomFrameH,
@@ -155,7 +119,7 @@ export const exportToPPT = (slides: SlideData[], filename: string) => {
     // Bottom Right Logo (S.S. ADVERTISERS logo)
     const logoW = 2.2;
     const logoH = 0.65;
-    const logoX = bottomFrameX + bottomFrameW - logoW - 0.05; // 7.45
+    const logoX = bottomFrameX + bottomFrameW - logoW;
     const logoY = bottomFrameY + (bottomFrameH - logoH) / 2;
 
     try {
