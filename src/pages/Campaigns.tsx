@@ -1,12 +1,11 @@
-import { Plus, Calendar, MapPin, Loader2, Trash2, Edit3, FileText, FileDown, MessageSquare, ArrowDownUp, X, Check } from 'lucide-react';
+import { Plus, Calendar, MapPin, Loader2, Trash2, Edit3, FileDown, MessageSquare, ArrowDownUp, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { exportToExcel, exportToPPT } from '../utils/export';
+import { exportToExcel } from '../utils/export';
 import { useState, useEffect, useMemo } from 'react';
 import { Campaign, Hoarding } from '../types';
 import { campaignService } from '../services/campaignService';
 import { hoardingService } from '../services/hoardingService';
 import { calculateDays, isPast, isFuture } from '../utils/date';
-import { format, parseISO } from 'date-fns';
 import CampaignModal from '../components/CampaignModal';
 
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -220,33 +219,6 @@ export default function Campaigns() {
     setShowExcelModal(false);
   };
 
-  const handleExportPPT = () => {
-    const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
-      const cityA = (hoardings[a.hoarding_id]?.city || 'Chennai').trim();
-      const cityB = (hoardings[b.hoarding_id]?.city || 'Chennai').trim();
-      const cityComp = cityA.localeCompare(cityB, undefined, { sensitivity: 'base' });
-      if (cityComp !== 0) return cityComp;
-
-      const locA = hoardings[a.hoarding_id]?.location || '';
-      const locB = hoardings[b.hoarding_id]?.location || '';
-      return locA.localeCompare(locB, undefined, { sensitivity: 'base' });
-    });
-
-    const slides = sortedCampaigns.map(c => ({
-      imageUrl: hoardings[c.hoarding_id]?.image_url || '',
-      location: hoardings[c.hoarding_id]?.location || 'Unknown',
-      city: hoardings[c.hoarding_id]?.city,
-      dimensions: `${hoardings[c.hoarding_id]?.width || '?'}×${hoardings[c.hoarding_id]?.height || '?'} ft`,
-      clientInfo: c.client_info,
-      startDate: format(parseISO(c.start_date), 'MMM dd, yyyy'),
-      endDate: format(parseISO(c.end_date), 'MMM dd, yyyy'),
-      status: getStatus(c.start_date, c.end_date),
-      poStatus: c.po_status,
-      hoardingId: c.hoarding_id,
-    }));
-    exportToPPT(slides, 'Campaigns_Presentation');
-  };
-
   return (
     <div className="space-y-8 pb-20">
       {/* Toolbar: Tabs + Controls + Launch — all on one row */}
@@ -276,14 +248,6 @@ export default function Campaigns() {
           >
             <FileDown className="w-4 h-4" />
             <span className="hidden sm:inline">Excel</span>
-          </button>
-          <button
-            onClick={handleExportPPT}
-            className="px-4 py-2.5 bg-white text-slate-600 rounded-xl font-bold text-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-            title="Export PowerPoint"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">PPT</span>
           </button>
           <button
             onClick={() => setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest')}
