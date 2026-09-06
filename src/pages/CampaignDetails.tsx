@@ -78,6 +78,7 @@ export default function CampaignDetails() {
       onConfirm: async () => {
         try {
           setIsLoading(true);
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
           await campaignService.delete(campaign.id);
           navigate('/campaigns');
         } catch (error: any) {
@@ -87,7 +88,7 @@ export default function CampaignDetails() {
             title: 'Deletion Failed',
             message: error.message || 'Check database permissions',
             variant: 'danger',
-            onConfirm: () => {},
+            onConfirm: () => setConfirmConfig(prev => ({ ...prev, isOpen: false })),
           });
           setIsLoading(false);
         }
