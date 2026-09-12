@@ -40,7 +40,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Goripalayam%20AV%20Bridge%2022x32_1.jpg",
+      "image_url": "/location_images/Goripalayam%20AV%20Bridge%2022x32_1.jpg",
       "created_at": "2026-08-24T19:17:17.800Z"
     },
     {
@@ -58,7 +58,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kalavasal%20Guru%20Theater%20Vaigai%20Over%20Bridge%2040x25.png",
+      "image_url": "/location_images/Kalavasal%20Guru%20Theater%20Vaigai%20Over%20Bridge%2040x25.png",
       "created_at": "2026-08-24T19:17:17.801Z"
     },
     {
@@ -76,7 +76,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Mandela%20Nagar%20Junction%2060x30.png",
+      "image_url": "/location_images/Airport%20Mandela%20Nagar%20Junction%2060x30.png",
       "created_at": "2026-08-24T19:17:17.802Z"
     },
     {
@@ -94,7 +94,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Road%20Nr%20HCL%20(Towards%20Madurai)%2095x30.png",
+      "image_url": "/location_images/Airport%20Road%20Nr%20HCL%20(Towards%20Madurai)%2095x30.png",
       "created_at": "2026-08-24T19:17:17.802Z"
     },
     {
@@ -112,7 +112,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Road%20Nr%20HCL%20(Towards%20Madurai)%2095x30.png",
+      "image_url": "/location_images/Airport%20Road%20Nr%20HCL%20(Towards%20Madurai)%2095x30.png",
       "created_at": "2026-08-24T19:17:17.803Z"
     },
     {
@@ -130,7 +130,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Mattuthavani%20Bus%20Stand%20Nr%20Saravana%20Stores%2047x28.png",
+      "image_url": "/location_images/Mattuthavani%20Bus%20Stand%20Nr%20Saravana%20Stores%2047x28.png",
       "created_at": "2026-08-24T19:17:17.803Z"
     },
     {
@@ -148,7 +148,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Mattuthavani%20Bus%20Stand%20Nr%20Saravana%20Stores%2047x25.png",
+      "image_url": "/location_images/Mattuthavani%20Bus%20Stand%20Nr%20Saravana%20Stores%2047x25.png",
       "created_at": "2026-08-24T19:17:17.804Z"
     },
     {
@@ -166,7 +166,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Vandiyur%20Toll%20Gate%20Towards%20Mattuthavani%2020x25.png",
+      "image_url": "/location_images/Anna%20Nagar%20Vandiyur%20Toll%20Gate%20Towards%20Mattuthavani%2020x25.png",
       "created_at": "2026-08-24T19:17:17.804Z"
     },
     {
@@ -184,7 +184,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Vadiyur%20Toll%20Gate%20Opp%20RIO%20Hospital%20Towards%20Airport%2020x25.png",
+      "image_url": "/location_images/Anna%20Nagar%20Vadiyur%20Toll%20Gate%20Opp%20RIO%20Hospital%20Towards%20Airport%2020x25.png",
       "created_at": "2026-08-24T19:17:17.804Z"
     },
     {
@@ -202,7 +202,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vandiyur%20Tollgate%20Towards%20City%2040x30.png",
+      "image_url": "/location_images/Vandiyur%20Tollgate%20Towards%20City%2040x30.png",
       "created_at": "2026-08-24T19:17:17.805Z"
     },
     {
@@ -220,7 +220,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Arapalayam%20Junction%2020x30.png",
+      "image_url": "/location_images/Arapalayam%20Junction%2020x30.png",
       "created_at": "2026-08-24T19:17:17.805Z"
     },
     {
@@ -238,7 +238,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Apollo%2033x33.png",
+      "image_url": "/location_images/Anna%20Nagar%20Apollo%2033x33.png",
       "created_at": "2026-08-24T19:17:17.806Z"
     },
     {
@@ -256,7 +256,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thiruparakundram%20Towards%20Madurai%2055x25.png",
+      "image_url": "/location_images/Thiruparakundram%20Towards%20Madurai%2055x25.png",
       "created_at": "2026-08-24T19:17:17.806Z"
     },
     {
@@ -274,7 +274,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thiruparakundram%20Towards%20Madurai%2055x25.png",
+      "image_url": "/location_images/Thiruparakundram%20Towards%20Madurai%2055x25.png",
       "created_at": "2026-08-24T19:17:17.806Z"
     },
     {
@@ -292,7 +292,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Periyar%20Bus%20Stand%20Nr%20Townhall%20Road%2050x15.png",
+      "image_url": "/location_images/Periyar%20Bus%20Stand%20Nr%20Townhall%20Road%2050x15.png",
       "created_at": "2026-08-24T19:17:17.807Z"
     },
     {
@@ -310,7 +310,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Periyar%20Bus%20Stand%2035x20.png",
+      "image_url": "/location_images/Periyar%20Bus%20Stand%2035x20.png",
       "created_at": "2026-08-24T19:17:17.807Z"
     },
     {
@@ -328,7 +328,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Nethaji%20Road%20Periyar%20Bus%20Stand%20Front%2020x20.png",
+      "image_url": "/location_images/Nethaji%20Road%20Periyar%20Bus%20Stand%20Front%2020x20.png",
       "created_at": "2026-08-24T19:17:17.807Z"
     },
     {
@@ -346,7 +346,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Nethaji%20Road%20Periyar%20Bus%20Stand%20Back%2020x20.png",
+      "image_url": "/location_images/Nethaji%20Road%20Periyar%20Bus%20Stand%20Back%2020x20.png",
       "created_at": "2026-08-24T19:17:17.808Z"
     },
     {
@@ -364,7 +364,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Junction%2020x20.png",
+      "image_url": "/location_images/Simmakkal%20Junction%2020x20.png",
       "created_at": "2026-08-24T19:17:17.808Z"
     },
     {
@@ -382,7 +382,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sethupathi%20School%20Simmakkal%2045x28.jpg",
+      "image_url": "/location_images/Sethupathi%20School%20Simmakkal%2045x28.jpg",
       "created_at": "2026-08-24T19:17:17.808Z"
     },
     {
@@ -400,7 +400,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Junction%20-%20R%2030x25.png",
+      "image_url": "/location_images/Simmakkal%20Junction%20-%20R%2030x25.png",
       "created_at": "2026-08-24T19:17:17.809Z"
     },
     {
@@ -418,7 +418,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Junction%20-%20L%2030x25.jpg",
+      "image_url": "/location_images/Simmakkal%20Junction%20-%20L%2030x25.jpg",
       "created_at": "2026-08-24T19:17:17.809Z"
     },
     {
@@ -436,7 +436,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Junction%20(%20Towards%20Periyar%20)%2030x25.png",
+      "image_url": "/location_images/Simmakkal%20Junction%20(%20Towards%20Periyar%20)%2030x25.png",
       "created_at": "2026-08-24T19:17:17.809Z"
     },
     {
@@ -454,7 +454,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Vakil%20New%20Street%20-%20L%2020x25.png",
+      "image_url": "/location_images/Simmakkal%20Vakil%20New%20Street%20-%20L%2020x25.png",
       "created_at": "2026-08-24T19:17:17.809Z"
     },
     {
@@ -472,7 +472,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Vakil%20New%20Street%20%E2%80%93%20R%2020x25.png",
+      "image_url": "/location_images/Simmakkal%20Vakil%20New%20Street%20%E2%80%93%20R%2020x25.png",
       "created_at": "2026-08-24T19:17:17.809Z"
     },
     {
@@ -490,7 +490,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20Railway%20Junction%2040x13.png",
+      "image_url": "/location_images/Madurai%20Railway%20Junction%2040x13.png",
       "created_at": "2026-08-24T19:17:17.810Z"
     },
     {
@@ -508,7 +508,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Sunday%20Market%2020x25.jpg",
+      "image_url": "/location_images/Simmakkal%20Sunday%20Market%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.810Z"
     },
     {
@@ -526,7 +526,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kalavasal%20Junction%2020x20.jpg",
+      "image_url": "/location_images/Kalavasal%20Junction%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.810Z"
     },
     {
@@ -544,7 +544,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kalavasal%20junction%2020x25.jpg",
+      "image_url": "/location_images/Kalavasal%20junction%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.810Z"
     },
     {
@@ -562,7 +562,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kalavasal%20Fenner%20Junction%2020x20.jpg",
+      "image_url": "/location_images/Kalavasal%20Fenner%20Junction%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.810Z"
     },
     {
@@ -580,7 +580,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Andalpuram%20Bridge%2020x15.jpg",
+      "image_url": "/location_images/Andalpuram%20Bridge%2020x15.jpg",
       "created_at": "2026-08-24T19:17:17.811Z"
     },
     {
@@ -598,7 +598,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madura%20college%20over%20bridge%2022x20.jpg",
+      "image_url": "/location_images/Madura%20college%20over%20bridge%2022x20.jpg",
       "created_at": "2026-08-24T19:17:17.811Z"
     },
     {
@@ -616,7 +616,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madura%20college%20over%20bridge%2025x18.jpg",
+      "image_url": "/location_images/Madura%20college%20over%20bridge%2025x18.jpg",
       "created_at": "2026-08-24T19:17:17.811Z"
     },
     {
@@ -634,7 +634,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20IT%20Park%20Nr%20HCL%2050x20.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20IT%20Park%20Nr%20HCL%2050x20.jpg",
       "created_at": "2026-08-24T19:17:17.811Z"
     },
     {
@@ -652,7 +652,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Pandikovil%20Junction%20Rountana%2040x15.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20Pandikovil%20Junction%20Rountana%2040x15.jpg",
       "created_at": "2026-08-24T19:17:17.811Z"
     },
     {
@@ -670,7 +670,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Pandikovil%2030x25.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20Pandikovil%2030x25.jpg",
       "created_at": "2026-08-24T19:17:17.812Z"
     },
     {
@@ -688,7 +688,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Othakadai%20Towards%20Mattuthavani%20Bus%20Stand%2040x20.jpg",
+      "image_url": "/location_images/Othakadai%20Towards%20Mattuthavani%20Bus%20Stand%2040x20.jpg",
       "created_at": "2026-08-24T19:17:17.812Z"
     },
     {
@@ -706,7 +706,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Towards%20Airport%20Nr%20D%20Mart%2025x20.jpg",
+      "image_url": "/location_images/Towards%20Airport%20Nr%20D%20Mart%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.812Z"
     },
     {
@@ -724,7 +724,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Towards%20City%20Airport%20Avaniyapuram%20D%20Mart%2025x20.jpg",
+      "image_url": "/location_images/Towards%20City%20Airport%20Avaniyapuram%20D%20Mart%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.812Z"
     },
     {
@@ -742,7 +742,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Towards%20Madurai%20City%20Avaiyapuram%2020x20.jpg",
+      "image_url": "/location_images/Airport%20Towards%20Madurai%20City%20Avaiyapuram%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.813Z"
     },
     {
@@ -760,7 +760,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Othakadai%20Nr%20Madras%20High%20Court%2020x20.jpg",
+      "image_url": "/location_images/Othakadai%20Nr%20Madras%20High%20Court%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.813Z"
     },
     {
@@ -778,7 +778,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Othakadai%20Towards%20Mattuthavani%20Bus%20Stand%20Nr%20High%20Court%2020x30.jpg",
+      "image_url": "/location_images/Othakadai%20Towards%20Mattuthavani%20Bus%20Stand%20Nr%20High%20Court%2020x30.jpg",
       "created_at": "2026-08-24T19:17:17.813Z"
     },
     {
@@ -796,7 +796,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Othakadai%2030x15.jpg",
+      "image_url": "/location_images/Othakadai%2030x15.jpg",
       "created_at": "2026-08-24T19:17:17.813Z"
     },
     {
@@ -814,7 +814,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Towards%20Airport%20Maandela%20Nagar%2040x25.jpg",
+      "image_url": "/location_images/Towards%20Airport%20Maandela%20Nagar%2040x25.jpg",
       "created_at": "2026-08-24T19:17:17.813Z"
     },
     {
@@ -832,7 +832,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Athisayam%20Theme%20Park%20Paravai%2050x20.jpg",
+      "image_url": "/location_images/Athisayam%20Theme%20Park%20Paravai%2050x20.jpg",
       "created_at": "2026-08-24T19:17:17.814Z"
     },
     {
@@ -850,7 +850,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Paravai%20Back%20(%20Towards%20Vadipatti%20)%2025x20.jpg",
+      "image_url": "/location_images/Paravai%20Back%20(%20Towards%20Vadipatti%20)%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.814Z"
     },
     {
@@ -868,7 +868,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Paravai%20Front%20(Towards%20Madurai%20)%2025x25.jpg",
+      "image_url": "/location_images/Paravai%20Front%20(Towards%20Madurai%20)%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.814Z"
     },
     {
@@ -886,7 +886,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Paravai%20(%20Towards%20City%20)%2040x30.jpg",
+      "image_url": "/location_images/Paravai%20(%20Towards%20City%20)%2040x30.jpg",
       "created_at": "2026-08-24T19:17:17.814Z"
     },
     {
@@ -904,7 +904,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Ramnad%20Road%20Velammal%20Medical%20college%20Roundana%2070x25.jpg",
+      "image_url": "/location_images/Ramnad%20Road%20Velammal%20Medical%20college%20Roundana%2070x25.jpg",
       "created_at": "2026-08-24T19:17:17.815Z"
     },
     {
@@ -922,7 +922,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Ramnad%20Road%20Velammal%20Medical%20college%20Roundana%2020x20.jpg",
+      "image_url": "/location_images/Ramnad%20Road%20Velammal%20Medical%20college%20Roundana%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.815Z"
     },
     {
@@ -940,7 +940,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theppakulam%20Viraganoor%2020x30.jpg",
+      "image_url": "/location_images/Theppakulam%20Viraganoor%2020x30.jpg",
       "created_at": "2026-08-24T19:17:17.815Z"
     },
     {
@@ -958,7 +958,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Melur%20Bus%20Stand%20Opp%2025x20.jpg",
+      "image_url": "/location_images/Melur%20Bus%20Stand%20Opp%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.815Z"
     },
     {
@@ -976,7 +976,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Melur%20Bus%20Stand%20Opp%2030x20.jpg",
+      "image_url": "/location_images/Melur%20Bus%20Stand%20Opp%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.815Z"
     },
     {
@@ -994,7 +994,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivagangai%20Road%20Karupaiurani%2030x20.jpg",
+      "image_url": "/location_images/Sivagangai%20Road%20Karupaiurani%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.816Z"
     },
     {
@@ -1012,7 +1012,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivagagai%20Towards%20Madurai%20Karupayurani%2030x20.png",
+      "image_url": "/location_images/Sivagagai%20Towards%20Madurai%20Karupayurani%2030x20.png",
       "created_at": "2026-08-24T19:17:17.816Z"
     },
     {
@@ -1030,7 +1030,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/TPK%20Road%20Nr%20Mannar%20College%2045x20.jpg",
+      "image_url": "/location_images/TPK%20Road%20Nr%20Mannar%20College%2045x20.jpg",
       "created_at": "2026-08-24T19:17:17.816Z"
     },
     {
@@ -1048,7 +1048,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/TPK%20Road%20Bridge%2040x30.jpg",
+      "image_url": "/location_images/TPK%20Road%20Bridge%2040x30.jpg",
       "created_at": "2026-08-24T19:17:17.816Z"
     },
     {
@@ -1066,7 +1066,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thanakankulam%20Ford%20Showroom%2020x20.jpg",
+      "image_url": "/location_images/Thanakankulam%20Ford%20Showroom%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.816Z"
     },
     {
@@ -1084,7 +1084,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thirunagar%20Towards%20Madurai%2020x20.jpg",
+      "image_url": "/location_images/Thirunagar%20Towards%20Madurai%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.817Z"
     },
     {
@@ -1102,7 +1102,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thirunagar%20Towards%20Tirumangalam%2020x20.jpg",
+      "image_url": "/location_images/Thirunagar%20Towards%20Tirumangalam%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.817Z"
     },
     {
@@ -1120,7 +1120,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Suguna%20Stores%2020x30.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20Suguna%20Stores%2020x30.jpg",
       "created_at": "2026-08-24T19:17:17.817Z"
     },
     {
@@ -1138,7 +1138,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kamarajar%20Salai%2070x30_1.jpg",
+      "image_url": "/location_images/Kamarajar%20Salai%2070x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.817Z"
     },
     {
@@ -1156,7 +1156,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kamarajar%20Salai%20Nr%20Big%20Cinimas%2035x15.jpg",
+      "image_url": "/location_images/Kamarajar%20Salai%20Nr%20Big%20Cinimas%2035x15.jpg",
       "created_at": "2026-08-24T19:17:17.817Z"
     },
     {
@@ -1174,7 +1174,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kuruvikaransalai%20Nr%20Kamarajar%20Salai%20Bigcinimas%20-%20L%2080x25.jpg",
+      "image_url": "/location_images/Kuruvikaransalai%20Nr%20Kamarajar%20Salai%20Bigcinimas%20-%20L%2080x25.jpg",
       "created_at": "2026-08-24T19:17:17.818Z"
     },
     {
@@ -1192,7 +1192,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kuruvikaransalai%20Nr%20Kamarajar%20Salai%20Bigcinimas%20-%20L%2080x25.jpg",
+      "image_url": "/location_images/Kuruvikaransalai%20Nr%20Kamarajar%20Salai%20Bigcinimas%20-%20L%2080x25.jpg",
       "created_at": "2026-08-24T19:17:17.818Z"
     },
     {
@@ -1210,7 +1210,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Aravind%20Eye%20Hospital%20Signal%2050x25.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20Aravind%20Eye%20Hospital%20Signal%2050x25.jpg",
       "created_at": "2026-08-24T19:17:17.818Z"
     },
     {
@@ -1228,7 +1228,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kamarajar%20Salai%20Vilakuthun%2025x20.jpg",
+      "image_url": "/location_images/Kamarajar%20Salai%20Vilakuthun%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.818Z"
     },
     {
@@ -1246,7 +1246,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kamarajar%20Salai%2070x30_1.jpg",
+      "image_url": "/location_images/Kamarajar%20Salai%2070x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.819Z"
     },
     {
@@ -1264,7 +1264,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Signal%2030x30.jpg",
+      "image_url": "/location_images/Vilakuthun%20Signal%2030x30.jpg",
       "created_at": "2026-08-24T19:17:17.819Z"
     },
     {
@@ -1282,7 +1282,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Signal%20Towards%20Meenakshi%20Temple%2013x25.jpg",
+      "image_url": "/location_images/Vilakuthun%20Signal%20Towards%20Meenakshi%20Temple%2013x25.jpg",
       "created_at": "2026-08-24T19:17:17.819Z"
     },
     {
@@ -1300,7 +1300,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Signal%20Towards%20Meenakshi%20Temple%2030x22.jpg",
+      "image_url": "/location_images/Vilakuthun%20Signal%20Towards%20Meenakshi%20Temple%2030x22.jpg",
       "created_at": "2026-08-24T19:17:17.819Z"
     },
     {
@@ -1318,7 +1318,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Market%2016x25.jpg",
+      "image_url": "/location_images/Vilakuthun%20Market%2016x25.jpg",
       "created_at": "2026-08-24T19:17:17.819Z"
     },
     {
@@ -1336,7 +1336,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Vilakuthun%20Market%20Thermuti%2017x12.jpg",
+      "image_url": "/location_images/Vilakuthun%20Market%20Thermuti%2017x12.jpg",
       "created_at": "2026-08-24T19:17:17.820Z"
     },
     {
@@ -1354,7 +1354,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Simmakkal%20Nelpettai%2012x20.jpg",
+      "image_url": "/location_images/Simmakkal%20Nelpettai%2012x20.jpg",
       "created_at": "2026-08-24T19:17:17.820Z"
     },
     {
@@ -1372,7 +1372,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Surveyor%20Colony%20Nr%20Mattuthavani%2040x20.jpg",
+      "image_url": "/location_images/Surveyor%20Colony%20Nr%20Mattuthavani%2040x20.jpg",
       "created_at": "2026-08-24T19:17:17.820Z"
     },
     {
@@ -1390,7 +1390,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Surveyor%20Colony%20Three%20Road%20Junction%2020x15.jpg",
+      "image_url": "/location_images/Surveyor%20Colony%20Three%20Road%20Junction%2020x15.jpg",
       "created_at": "2026-08-24T19:17:17.820Z"
     },
     {
@@ -1408,7 +1408,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Surveyor%20Colony%20Mattuthavani%20Road%20Junction%2025x18.jpg",
+      "image_url": "/location_images/Surveyor%20Colony%20Mattuthavani%20Road%20Junction%2025x18.jpg",
       "created_at": "2026-08-24T19:17:17.821Z"
     },
     {
@@ -1426,7 +1426,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Iyarbanglow%20Towards%20Moondrumavadi%2020x30.jpg",
+      "image_url": "/location_images/Iyarbanglow%20Towards%20Moondrumavadi%2020x30.jpg",
       "created_at": "2026-08-24T19:17:17.821Z"
     },
     {
@@ -1444,7 +1444,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Alagarkovil%20Road%20Kadachanedhal%2022x20.jpg",
+      "image_url": "/location_images/Alagarkovil%20Road%20Kadachanedhal%2022x20.jpg",
       "created_at": "2026-08-24T19:17:17.821Z"
     },
     {
@@ -1462,7 +1462,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Alagarkovil%20Road%20Kadachanethal%20(%20Towards%20City)%2040x30.jpg",
+      "image_url": "/location_images/Alagarkovil%20Road%20Kadachanethal%20(%20Towards%20City)%2040x30.jpg",
       "created_at": "2026-08-24T19:17:17.821Z"
     },
     {
@@ -1480,7 +1480,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Pudur%20Bus%20Stand%2040x40.jpg",
+      "image_url": "/location_images/Pudur%20Bus%20Stand%2040x40.jpg",
       "created_at": "2026-08-24T19:17:17.822Z"
     },
     {
@@ -1498,7 +1498,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thallakulam%2012x23.jpg",
+      "image_url": "/location_images/Thallakulam%2012x23.jpg",
       "created_at": "2026-08-24T19:17:17.822Z"
     },
     {
@@ -1516,7 +1516,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirupalai%20Yadava%20College%2030x20.jpg",
+      "image_url": "/location_images/Tirupalai%20Yadava%20College%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.822Z"
     },
     {
@@ -1534,7 +1534,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Oomachikulam%20Fly%20Over%20Towards%20Natham%2020x25_1.jpg",
+      "image_url": "/location_images/Oomachikulam%20Fly%20Over%20Towards%20Natham%2020x25_1.jpg",
       "created_at": "2026-08-24T19:17:17.822Z"
     },
     {
@@ -1552,7 +1552,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Natham%20Towards%20Madurai%20Iyar%20Bunglow%2020x25.jpg",
+      "image_url": "/location_images/Natham%20Towards%20Madurai%20Iyar%20Bunglow%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.822Z"
     },
     {
@@ -1570,7 +1570,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Alanganallur%20Road%20Sikantharchavati%20Radio%20Station%2030x30.jpg",
+      "image_url": "/location_images/Alanganallur%20Road%20Sikantharchavati%20Radio%20Station%2030x30.jpg",
       "created_at": "2026-08-24T19:17:17.823Z"
     },
     {
@@ -1588,7 +1588,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Airport%20Perunkudi%2035x30.jpg",
+      "image_url": "/location_images/Airport%20Perunkudi%2035x30.jpg",
       "created_at": "2026-08-24T19:17:17.823Z"
     },
     {
@@ -1606,7 +1606,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Ramnad%20Road%20Silaiman%2025x20.jpg",
+      "image_url": "/location_images/Ramnad%20Road%20Silaiman%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.823Z"
     },
     {
@@ -1624,7 +1624,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Nagamalai%20puthukottai%2014x18.jpg",
+      "image_url": "/location_images/Nagamalai%20puthukottai%2014x18.jpg",
       "created_at": "2026-08-24T19:17:17.823Z"
     },
     {
@@ -1642,7 +1642,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viratipathu%2020x20.jpg",
+      "image_url": "/location_images/Viratipathu%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.823Z"
     },
     {
@@ -1660,7 +1660,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20Towards%20Madurai%20Entrance%20Tirumangalam%20Tollgate%2080x30_1.jpg",
+      "image_url": "/location_images/Tirunelveli%20Towards%20Madurai%20Entrance%20Tirumangalam%20Tollgate%2080x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.824Z"
     },
     {
@@ -1678,7 +1678,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20%E2%80%93%20Tirunelveli%20Tirumangalam%20Toll%20gate%2040x20.jpg",
+      "image_url": "/location_images/Madurai%20%E2%80%93%20Tirunelveli%20Tirumangalam%20Toll%20gate%2040x20.jpg",
       "created_at": "2026-08-24T19:17:17.824Z"
     },
     {
@@ -1696,7 +1696,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Madurai%20City%2080x30.jpg",
+      "image_url": "/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Madurai%20City%2080x30.jpg",
       "created_at": "2026-08-24T19:17:17.824Z"
     },
     {
@@ -1714,7 +1714,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Thirumangalam%2080x30.jpg",
+      "image_url": "/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Thirumangalam%2080x30.jpg",
       "created_at": "2026-08-24T19:17:17.824Z"
     },
     {
@@ -1732,7 +1732,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Madurai%20City%2080x30.jpg",
+      "image_url": "/location_images/Kappalur%20Nissan%20Showroom%20Towards%20Madurai%20City%2080x30.jpg",
       "created_at": "2026-08-24T19:17:17.824Z"
     },
     {
@@ -1750,7 +1750,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20-%20Samayanallur%20over%20bridge%20100x30_1.jpg",
+      "image_url": "/location_images/Madurai%20-%20Samayanallur%20over%20bridge%20100x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.825Z"
     },
     {
@@ -1768,7 +1768,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai-samayanallur%20over%20bridge%20front%20100x20.jpg",
+      "image_url": "/location_images/Madurai-samayanallur%20over%20bridge%20front%20100x20.jpg",
       "created_at": "2026-08-24T19:17:17.825Z"
     },
     {
@@ -1786,7 +1786,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Samayanallur%20Over%20Bridge%2060x25.jpg",
+      "image_url": "/location_images/Samayanallur%20Over%20Bridge%2060x25.jpg",
       "created_at": "2026-08-24T19:17:17.825Z"
     },
     {
@@ -1804,7 +1804,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Dindigul%20To%20Madurai%20Thanichiyam%2030x30.jpg",
+      "image_url": "/location_images/Dindigul%20To%20Madurai%20Thanichiyam%2030x30.jpg",
       "created_at": "2026-08-24T19:17:17.825Z"
     },
     {
@@ -1822,7 +1822,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Melur%20Main%20Road%20near%20TVS%20Gowdown%2050x20.jpg",
+      "image_url": "/location_images/Melur%20Main%20Road%20near%20TVS%20Gowdown%2050x20.jpg",
       "created_at": "2026-08-24T19:17:17.826Z"
     },
     {
@@ -1840,7 +1840,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Melur%20Main%20Road%20tollgate%2080x30_1.jpg",
+      "image_url": "/location_images/Melur%20Main%20Road%20tollgate%2080x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.826Z"
     },
     {
@@ -1858,7 +1858,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20Kamarajar%20University%2020x25.jpg",
+      "image_url": "/location_images/Madurai%20Kamarajar%20University%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.826Z"
     },
     {
@@ -1876,7 +1876,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20Kamarajar%20University%2020x25.jpg",
+      "image_url": "/location_images/Madurai%20Kamarajar%20University%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.826Z"
     },
     {
@@ -1894,7 +1894,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tuticorin%20-%20Madurai%20valayankulam%20Toll%20Gate%2050x30.jpg",
+      "image_url": "/location_images/Tuticorin%20-%20Madurai%20valayankulam%20Toll%20Gate%2050x30.jpg",
       "created_at": "2026-08-24T19:17:17.826Z"
     },
     {
@@ -1912,7 +1912,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thirupuvanam%20Junction%2040x15.jpg",
+      "image_url": "/location_images/Thirupuvanam%20Junction%2040x15.jpg",
       "created_at": "2026-08-24T19:17:17.827Z"
     },
     {
@@ -1930,7 +1930,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Usilampatti%20Bus%20Stand%2025x20.jpg",
+      "image_url": "/location_images/Usilampatti%20Bus%20Stand%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.827Z"
     },
     {
@@ -1948,7 +1948,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/B%20B%20Kulam%2020x15.jpg",
+      "image_url": "/location_images/B%20B%20Kulam%2020x15.jpg",
       "created_at": "2026-08-24T19:17:17.827Z"
     },
     {
@@ -1966,7 +1966,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Karupayurani%20Nr%20solamalai%20College%2025x25.jpg",
+      "image_url": "/location_images/Karupayurani%20Nr%20solamalai%20College%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.827Z"
     },
     {
@@ -1984,7 +1984,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thanakankulam%2060x25.jpg",
+      "image_url": "/location_images/Thanakankulam%2060x25.jpg",
       "created_at": "2026-08-24T19:17:17.827Z"
     },
     {
@@ -2002,7 +2002,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thirunagar%20-%20R%2030x25_1.jpg",
+      "image_url": "/location_images/Thirunagar%20-%20R%2030x25_1.jpg",
       "created_at": "2026-08-24T19:17:17.828Z"
     },
     {
@@ -2020,7 +2020,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Thirunagar%20-%20L%2030x25.jpg",
+      "image_url": "/location_images/Thirunagar%20-%20L%2030x25.jpg",
       "created_at": "2026-08-24T19:17:17.828Z"
     },
     {
@@ -2038,7 +2038,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Palanganatham%20Junction%2020x25.jpg",
+      "image_url": "/location_images/Palanganatham%20Junction%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.828Z"
     },
     {
@@ -2056,7 +2056,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Pattabiram%2035x30_1.jpg",
+      "image_url": "/location_images/Pattabiram%2035x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.828Z"
     },
     {
@@ -2074,7 +2074,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Avadi%20Bridge%2025x30.jpg",
+      "image_url": "/location_images/Avadi%20Bridge%2025x30.jpg",
       "created_at": "2026-08-24T19:17:17.828Z"
     },
     {
@@ -2092,7 +2092,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Ramnad%20Entrance%20Tollgate%2060x25.jpg",
+      "image_url": "/location_images/Ramnad%20Entrance%20Tollgate%2060x25.jpg",
       "created_at": "2026-08-24T19:17:17.829Z"
     },
     {
@@ -2110,7 +2110,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam%20Entrance%20(%20Sankarankovil%20To%20Sivakasi%20Road%20)%2025X30.jpg",
+      "image_url": "/location_images/Rajapalayam%20Entrance%20(%20Sankarankovil%20To%20Sivakasi%20Road%20)%2025X30.jpg",
       "created_at": "2026-08-24T19:17:17.829Z"
     },
     {
@@ -2128,7 +2128,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam%20Town%20Back%2025x25.jpg",
+      "image_url": "/location_images/Rajapalayam%20Town%20Back%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.829Z"
     },
     {
@@ -2146,7 +2146,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam%20Town%20Back%2025x25.jpg",
+      "image_url": "/location_images/Rajapalayam%20Town%20Back%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.829Z"
     },
     {
@@ -2164,7 +2164,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam-Krishnan%20kovi%20vpm%20college%2040X30.jpg",
+      "image_url": "/location_images/Rajapalayam-Krishnan%20kovi%20vpm%20college%2040X30.jpg",
       "created_at": "2026-08-24T19:17:17.829Z"
     },
     {
@@ -2182,7 +2182,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam-Manjammal%20polytechnic%20rajapalayam%20entrance%2020X30.jpg",
+      "image_url": "/location_images/Rajapalayam-Manjammal%20polytechnic%20rajapalayam%20entrance%2020X30.jpg",
       "created_at": "2026-08-24T19:17:17.830Z"
     },
     {
@@ -2200,7 +2200,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam-Nachiar%20Mill%2020x25%20Front.jpg",
+      "image_url": "/location_images/Rajapalayam-Nachiar%20Mill%2020x25%20Front.jpg",
       "created_at": "2026-08-24T19:17:17.830Z"
     },
     {
@@ -2218,7 +2218,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam-Nachiar%20Mill%2020x25%20Back.jpg",
+      "image_url": "/location_images/Rajapalayam-Nachiar%20Mill%2020x25%20Back.jpg",
       "created_at": "2026-08-24T19:17:17.830Z"
     },
     {
@@ -2236,7 +2236,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Rajapalayam%2040x15.jpg",
+      "image_url": "/location_images/Rajapalayam%2040x15.jpg",
       "created_at": "2026-08-24T19:17:17.830Z"
     },
     {
@@ -2254,7 +2254,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Paramakudi%20Bus%20Stand%2030x20.jpg",
+      "image_url": "/location_images/Paramakudi%20Bus%20Stand%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.831Z"
     },
     {
@@ -2272,7 +2272,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivagangai%20City%20Entrance%20Nr%20Priest%20University%2025x17.jpg",
+      "image_url": "/location_images/Sivagangai%20City%20Entrance%20Nr%20Priest%20University%2025x17.jpg",
       "created_at": "2026-08-24T19:17:17.831Z"
     },
     {
@@ -2290,7 +2290,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Madurai%20To%20Sivagangai%20Entrance%2025x20.jpg",
+      "image_url": "/location_images/Madurai%20To%20Sivagangai%20Entrance%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.831Z"
     },
     {
@@ -2308,7 +2308,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivagangai%20To%20Madurai%20Sivagangai%20Entrance%2030x20_1.jpg",
+      "image_url": "/location_images/Sivagangai%20To%20Madurai%20Sivagangai%20Entrance%2030x20_1.jpg",
       "created_at": "2026-08-24T19:17:17.831Z"
     },
     {
@@ -2326,7 +2326,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthunagar%20Main%20Bazzar%2020x18.jpg",
+      "image_url": "/location_images/Viruthunagar%20Main%20Bazzar%2020x18.jpg",
       "created_at": "2026-08-24T19:17:17.831Z"
     },
     {
@@ -2344,7 +2344,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthunagar%20City%20Entrance%20Kumarlingapuram%2050x30.jpg",
+      "image_url": "/location_images/Viruthunagar%20City%20Entrance%20Kumarlingapuram%2050x30.jpg",
       "created_at": "2026-08-24T19:17:17.832Z"
     },
     {
@@ -2362,7 +2362,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/T.Kallupatti%2015x15.jpg",
+      "image_url": "/location_images/T.Kallupatti%2015x15.jpg",
       "created_at": "2026-08-24T19:17:17.832Z"
     },
     {
@@ -2380,7 +2380,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/T.Kallupatti%2012x10.jpg",
+      "image_url": "/location_images/T.Kallupatti%2012x10.jpg",
       "created_at": "2026-08-24T19:17:17.832Z"
     },
     {
@@ -2398,7 +2398,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sathur%20(%20Towards%20Kovilpatti%20)%2030x20.jpg",
+      "image_url": "/location_images/Sathur%20(%20Towards%20Kovilpatti%20)%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.832Z"
     },
     {
@@ -2416,7 +2416,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sathur%20(Towards%20Madurai)%2032x20.jpg",
+      "image_url": "/location_images/Sathur%20(Towards%20Madurai)%2032x20.jpg",
       "created_at": "2026-08-24T19:17:17.832Z"
     },
     {
@@ -2434,7 +2434,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthu%20Nagar%20(%20Arupukottai%20Towards%20VNR%20)%2025x25.jpg",
+      "image_url": "/location_images/Viruthu%20Nagar%20(%20Arupukottai%20Towards%20VNR%20)%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.833Z"
     },
     {
@@ -2452,12 +2452,12 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthu%20Nagar%20(Towards%20Aruppukottai%20)%2025x25.jpg",
+      "image_url": "/location_images/Viruthu%20Nagar%20(Towards%20Aruppukottai%20)%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.833Z"
     },
     {
       "id": 136,
-      "location": "Viruthunagar  Collector Office ( Towards Viruthu Nagar)  – L",
+      "location": "Viruthunagar  Collector Office ( Towards Viruthu Nagar)  \u2013 L",
       "city": "Viruthunagar",
       "width": 36,
       "height": 25,
@@ -2470,12 +2470,12 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthunagar%20Collector%20Office%20(%20Towards%20Viruthu%20Nagar)%20%E2%80%93%20L%2036x25.jpg",
+      "image_url": "/location_images/Viruthunagar%20Collector%20Office%20(%20Towards%20Viruthu%20Nagar)%20%E2%80%93%20L%2036x25.jpg",
       "created_at": "2026-08-24T19:17:17.833Z"
     },
     {
       "id": 137,
-      "location": "Viruthunagar Collector Office – R",
+      "location": "Viruthunagar Collector Office \u2013 R",
       "city": "Viruthunagar",
       "width": 36,
       "height": 25,
@@ -2488,7 +2488,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthunagar%20Collector%20Office%20%E2%80%93%20R%2036x25.jpg",
+      "image_url": "/location_images/Viruthunagar%20Collector%20Office%20%E2%80%93%20R%2036x25.jpg",
       "created_at": "2026-08-24T19:17:17.833Z"
     },
     {
@@ -2506,7 +2506,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Pollachi%20road%20kinatrukadavu%2060x20.jpg",
+      "image_url": "/location_images/Pollachi%20road%20kinatrukadavu%2060x20.jpg",
       "created_at": "2026-08-24T19:17:17.833Z"
     },
     {
@@ -2524,7 +2524,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Annur%20road%20kurumbampalayam%2040x15_1.jpg",
+      "image_url": "/location_images/Annur%20road%20kurumbampalayam%2040x15_1.jpg",
       "created_at": "2026-08-24T19:17:17.834Z"
     },
     {
@@ -2542,7 +2542,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Trichy%20road%20chinnakodankipalayam%2060x15%20front.jpg",
+      "image_url": "/location_images/Trichy%20road%20chinnakodankipalayam%2060x15%20front.jpg",
       "created_at": "2026-08-24T19:17:17.834Z"
     },
     {
@@ -2560,7 +2560,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Trichy%20road%20Chinnakodankipalayam%2060x15%20back.jpg",
+      "image_url": "/location_images/Trichy%20road%20Chinnakodankipalayam%2060x15%20back.jpg",
       "created_at": "2026-08-24T19:17:17.834Z"
     },
     {
@@ -2578,7 +2578,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Mettupalayam%20Road%20Narasingapalayam%2056x20.jpg",
+      "image_url": "/location_images/Mettupalayam%20Road%20Narasingapalayam%2056x20.jpg",
       "created_at": "2026-08-24T19:17:17.834Z"
     },
     {
@@ -2596,7 +2596,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Coimbatore%20Karanampettai%2060x25.jpg",
+      "image_url": "/location_images/Coimbatore%20Karanampettai%2060x25.jpg",
       "created_at": "2026-08-24T19:17:17.834Z"
     },
     {
@@ -2614,7 +2614,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Coimbatore%20Karanampettai%2060x10%20Back.jpg",
+      "image_url": "/location_images/Coimbatore%20Karanampettai%2060x10%20Back.jpg",
       "created_at": "2026-08-24T19:17:17.835Z"
     },
     {
@@ -2632,7 +2632,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Avinashi%20Road%20Karumathampatti%2060x20.jpg",
+      "image_url": "/location_images/Avinashi%20Road%20Karumathampatti%2060x20.jpg",
       "created_at": "2026-08-24T19:17:17.835Z"
     },
     {
@@ -2650,7 +2650,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tutucorin%20Nila%20sea%20foods%2040x20.jpg",
+      "image_url": "/location_images/Tutucorin%20Nila%20sea%20foods%2040x20.jpg",
       "created_at": "2026-08-24T19:17:17.835Z"
     },
     {
@@ -2668,7 +2668,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kayatharu%20Tollgate%20Front%2070x20.jpg",
+      "image_url": "/location_images/Kayatharu%20Tollgate%20Front%2070x20.jpg",
       "created_at": "2026-08-24T19:17:17.835Z"
     },
     {
@@ -2686,7 +2686,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Kayatharu%20Tollgate%20Back%2070x30.jpg",
+      "image_url": "/location_images/Kayatharu%20Tollgate%20Back%2070x30.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2704,7 +2704,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Avinashi%20Road%20Karumathampatti%2060x20.jpg",
+      "image_url": "/location_images/Avinashi%20Road%20Karumathampatti%2060x20.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2722,7 +2722,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Anna%20Nagar%20Suguna%20Stores%2020x30.jpg",
+      "image_url": "/location_images/Anna%20Nagar%20Suguna%20Stores%2020x30.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2740,7 +2740,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Ambai%20To%20Nellai%20Road%2030x12.jpg",
+      "image_url": "/location_images/Ambai%20To%20Nellai%20Road%2030x12.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2758,7 +2758,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Cheranmaadevi%20Bus%20Stand%2020x15.jpg",
+      "image_url": "/location_images/Cheranmaadevi%20Bus%20Stand%2020x15.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2776,7 +2776,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Cheranmaadevi%20Bus%20Stand%2030x15.jpg",
+      "image_url": "/location_images/Cheranmaadevi%20Bus%20Stand%2030x15.jpg",
       "created_at": "2026-08-24T19:17:17.836Z"
     },
     {
@@ -2794,7 +2794,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20%E2%80%93%20Gangaikondan%2035x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20%E2%80%93%20Gangaikondan%2035x25.jpg",
       "created_at": "2026-08-24T19:17:17.837Z"
     },
     {
@@ -2812,7 +2812,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20Junction%2050x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20Junction%2050x25.jpg",
       "created_at": "2026-08-24T19:17:17.837Z"
     },
     {
@@ -2830,7 +2830,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20-%20(Towards%20Kutralam%20)%2025x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20-%20(Towards%20Kutralam%20)%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.837Z"
     },
     {
@@ -2848,7 +2848,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20(%20Kutralam%20Towards%20City%20)%2025x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20(%20Kutralam%20Towards%20City%20)%2025x25.jpg",
       "created_at": "2026-08-24T19:17:17.837Z"
     },
     {
@@ -2866,7 +2866,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20KTC%20Nagar%20Front%2030x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20KTC%20Nagar%20Front%2030x25.jpg",
       "created_at": "2026-08-24T19:17:17.837Z"
     },
     {
@@ -2884,7 +2884,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Tirunelveli%20KTC%20Nagar%20Back%2030x25.jpg",
+      "image_url": "/location_images/Tirunelveli%20KTC%20Nagar%20Back%2030x25.jpg",
       "created_at": "2026-08-24T19:17:17.838Z"
     },
     {
@@ -2902,7 +2902,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Palani%20Chathirapatti%20Towards%20Palani%2030x20.jpg",
+      "image_url": "/location_images/Palani%20Chathirapatti%20Towards%20Palani%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.838Z"
     },
     {
@@ -2920,7 +2920,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Palani%20Towards%20Ottanchathiram%20Chathirapatti%2030x20.jpg",
+      "image_url": "/location_images/Palani%20Towards%20Ottanchathiram%20Chathirapatti%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.838Z"
     },
     {
@@ -2938,7 +2938,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Elanji%2050x20.jpg",
+      "image_url": "/location_images/Elanji%2050x20.jpg",
       "created_at": "2026-08-24T19:17:17.838Z"
     },
     {
@@ -2956,7 +2956,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivakasi%20Bus%20Stand%2025x20.jpg",
+      "image_url": "/location_images/Sivakasi%20Bus%20Stand%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.838Z"
     },
     {
@@ -2974,7 +2974,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivakasi%20Thiruthangal%20Railwaygate%2020x20.jpg",
+      "image_url": "/location_images/Sivakasi%20Thiruthangal%20Railwaygate%2020x20.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -2992,7 +2992,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivakasi%20Sathur%20Road%20(front)%2030x20_1.jpg",
+      "image_url": "/location_images/Sivakasi%20Sathur%20Road%20(front)%2030x20_1.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -3010,7 +3010,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivakasi%20Sathur%20Road%2030x15.jpg",
+      "image_url": "/location_images/Sivakasi%20Sathur%20Road%2030x15.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -3028,7 +3028,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Viruthunagar%20Towards%20Sivakasi%20VV%20Nursing%20College%2060x15.jpg",
+      "image_url": "/location_images/Viruthunagar%20Towards%20Sivakasi%20VV%20Nursing%20College%2060x15.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -3046,7 +3046,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Sivakasi%20Towards%20Viruthunagar%20VV%20Nursing%20College%20College%2060x30_1.jpg",
+      "image_url": "/location_images/Sivakasi%20Towards%20Viruthunagar%20VV%20Nursing%20College%20College%2060x30_1.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -3064,7 +3064,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Veerapandi%2080x25.jpg",
+      "image_url": "/location_images/Veerapandi%2080x25.jpg",
       "created_at": "2026-08-24T19:17:17.839Z"
     },
     {
@@ -3082,7 +3082,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Toll%20Gate%2070x25.jpg",
+      "image_url": "/location_images/Theni%20Toll%20Gate%2070x25.jpg",
       "created_at": "2026-08-24T19:17:17.840Z"
     },
     {
@@ -3100,7 +3100,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Toll%20Gate%2070x25.jpg",
+      "image_url": "/location_images/Theni%20Toll%20Gate%2070x25.jpg",
       "created_at": "2026-08-24T19:17:17.840Z"
     },
     {
@@ -3118,7 +3118,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Andipatti%20Towards%20Theni%2025x25_1.jpg",
+      "image_url": "/location_images/Andipatti%20Towards%20Theni%2025x25_1.jpg",
       "created_at": "2026-08-24T19:17:17.840Z"
     },
     {
@@ -3136,7 +3136,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Towards%20Andipatti%2025x25_1.jpg",
+      "image_url": "/location_images/Theni%20Towards%20Andipatti%2025x25_1.jpg",
       "created_at": "2026-08-24T19:17:17.840Z"
     },
     {
@@ -3154,7 +3154,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Allinagaram%20Towards%20Periyakulam%2025x20.jpg",
+      "image_url": "/location_images/Theni%20Allinagaram%20Towards%20Periyakulam%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.840Z"
     },
     {
@@ -3172,7 +3172,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Allinagaram%20Towards%20Theni%2025x20.jpg",
+      "image_url": "/location_images/Theni%20Allinagaram%20Towards%20Theni%2025x20.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3190,7 +3190,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Kunnur%20Tollgate%2050x25.jpg",
+      "image_url": "/location_images/Theni%20Kunnur%20Tollgate%2050x25.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3208,7 +3208,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Bodi%20Bus%20Stand%20Nr%2020x25.jpg",
+      "image_url": "/location_images/Bodi%20Bus%20Stand%20Nr%2020x25.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3226,7 +3226,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Periyakulam%20Towards%20Theni%2080x25.jpg",
+      "image_url": "/location_images/Periyakulam%20Towards%20Theni%2080x25.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3244,7 +3244,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Theni%20Towards%20Periyakulam%2080x25.jpg",
+      "image_url": "/location_images/Theni%20Towards%20Periyakulam%2080x25.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3262,7 +3262,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Uthamapalayam%2030x20.jpg",
+      "image_url": "/location_images/Uthamapalayam%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.841Z"
     },
     {
@@ -3280,7 +3280,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Uthamapalayam%2030x20.jpg",
+      "image_url": "/location_images/Uthamapalayam%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.842Z"
     },
     {
@@ -3298,7 +3298,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Aruppukottai%20Sowdampiga%20College%2030x20.jpg",
+      "image_url": "/location_images/Aruppukottai%20Sowdampiga%20College%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.842Z"
     },
     {
@@ -3316,7 +3316,7 @@
       "latitude": "",
       "longitude": "",
       "is_owned": 1,
-      "image_url": "https://raw.githubusercontent.com/hariishwaran/ss-Agency/main/location_images/Aruppukottai%20Sowdampiga%20College%2030x20.jpg",
+      "image_url": "/location_images/Aruppukottai%20Sowdampiga%20College%2030x20.jpg",
       "created_at": "2026-08-24T19:17:17.842Z"
     }
   ],
