@@ -4,6 +4,7 @@ import fs from "fs";
 
 // ─── Database Setup (GitHub & Local File System Mode) ───────────────────────────
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
+const TMP_DB_PATH = path.join("/tmp", "admanager_db.json");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || "hariishwaran";
@@ -39,6 +40,18 @@ const asyncHandler =
 async function loadDb(): Promise<DatabaseState> {
   if (dbCache) {
     return dbCache;
+  }
+
+  // 1. Try /tmp/admanager_db.json if it exists
+  try {
+    if (fs.existsSync(TMP_DB_PATH)) {
+      const content = fs.readFileSync(TMP_DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      console.log("✅ Database loaded successfully from /tmp");
+      return dbCache!;
+    }
+  } catch (err: any) {
+    console.warn("Could not read from /tmp:", err.message);
   }
 
   if (GITHUB_TOKEN) {
@@ -91,7 +104,15 @@ async function saveDb(state: DatabaseState): Promise<void> {
   dbCache = state;
   const jsonString = JSON.stringify(state, null, 2);
 
-  // Write locally to disk
+  // Write to /tmp (always writable in serverless environments)
+  try {
+    fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
+    console.log("✅ Database saved to /tmp");
+  } catch (err: any) {
+    console.warn("Could not write database to /tmp:", err.message);
+  }
+
+  // Write locally to project disk if writable
   try {
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
     console.log("✅ Database saved to local disk");
