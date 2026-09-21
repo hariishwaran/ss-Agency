@@ -91,14 +91,12 @@ async function saveDb(state: DatabaseState): Promise<void> {
   dbCache = state;
   const jsonString = JSON.stringify(state, null, 2);
 
-  // Write locally if not in Vercel environment (or as a fallback)
-  if (!process.env.VERCEL) {
-    try {
-      fs.writeFileSync(DB_PATH, jsonString, "utf-8");
-      console.log("✅ Database saved to local disk");
-    } catch (err: any) {
-      console.error("Failed to save database to local disk:", err.message);
-    }
+  // Write locally to disk
+  try {
+    fs.writeFileSync(DB_PATH, jsonString, "utf-8");
+    console.log("✅ Database saved to local disk");
+  } catch (err: any) {
+    console.warn("Could not write database to disk:", err.message);
   }
 
   // Push to GitHub if GITHUB_TOKEN is present
@@ -152,6 +150,7 @@ let saveQueue: DatabaseState[] = [];
 
 async function queueSave() {
   const state = { users, owners, hoardings, campaigns, purchase_orders, ledger, flex_printing };
+  dbCache = state;
   if (isSaving) {
     saveQueue.push(state);
     return;
@@ -162,11 +161,18 @@ async function queueSave() {
   } finally {
     isSaving = false;
     if (saveQueue.length > 0) {
-      saveQueue.shift();
+      const nextState = saveQueue[saveQueue.length - 1];
       saveQueue = [];
-      queueSave();
+      await saveDb(nextState);
     }
   }
+}
+
+function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boolean {
+  if (recordId === undefined || recordId === null) return false;
+  if (String(recordId) === targetIdStr) return true;
+  if (Number.isFinite(targetIdNum) && Number(recordId) === targetIdNum) return true;
+  return false;
 }
 
 async function initDbState() {
@@ -481,20 +487,23 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   }));
 
   app.get("/api/campaigns/:id", requireAuth, asyncHandler(async (req, res) => {
-    const campaign = campaigns.find(c => c.id === Number(req.params.id));
+    const id = Number(req.params.id);
+    const rawId = String(req.params.id);
+    const campaign = campaigns.find(c => isMatch(c.id, id, rawId));
     if (!campaign) { res.status(404).json({ error: "Not found" }); return; }
     res.json(campaign);
   }));
 
   app.get("/api/campaigns/by-hoarding/:hoardingId", requireAuth, asyncHandler(async (req, res) => {
     const hoardingId = Number(req.params.hoardingId);
-    const filtered = campaigns.filter(c => c.hoarding_id === hoardingId).sort((a, b) => a.start_date.localeCompare(b.start_date));
+    const rawHoardingId = String(req.params.hoardingId);
+    const filtered = campaigns.filter(c => isMatch(c.hoarding_id, hoardingId, rawHoardingId)).sort((a, b) => a.start_date.localeCompare(b.start_date));
     res.json(filtered);
   }));
 
   app.post("/api/campaigns", requireAuth, asyncHandler(async (req, res) => {
     const d = req.body;
-    const nextId = campaigns.length > 0 ? Math.max(...campaigns.map(c => c.id)) + 1 : 1;
+    const nextId = campaigns.length > 0 ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
     const newCampaign = {
       id: nextId,
       client_info: d.client_info,
@@ -514,7 +523,8 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   app.put("/api/campaigns/:id", requireAuth, asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const index = campaigns.findIndex(c => c.id === id);
+    const rawId = String(req.params.id);
+    const index = campaigns.findIndex(c => isMatch(c.id, id, rawId));
     if (index === -1) { res.status(404).json({ error: "Not found" }); return; }
     
     const d = req.body;
@@ -525,7 +535,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     campaigns[index] = {
       ...campaigns[index],
       ...cleanFields,
-      id
+      id: campaigns[index].id
     };
     await queueSave();
     res.json(campaigns[index]);
@@ -534,10 +544,10 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   app.delete("/api/campaigns/:id", requireAuth, asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const rawId = String(req.params.id);
-    campaigns = campaigns.filter(c => Number(c.id) !== id && String(c.id) !== rawId);
-    purchase_orders = purchase_orders.filter(po => Number(po.campaign_id) !== id && String(po.campaign_id) !== rawId);
-    ledger = ledger.filter(l => Number(l.campaign_id) !== id && String(l.campaign_id) !== rawId);
-    flex_printing = flex_printing.filter(fp => Number(fp.campaign_id) !== id && String(fp.campaign_id) !== rawId);
+    campaigns = campaigns.filter(c => !isMatch(c.id, id, rawId));
+    purchase_orders = purchase_orders.filter(po => !isMatch(po.campaign_id, id, rawId));
+    ledger = ledger.filter(l => !isMatch(l.campaign_id, id, rawId));
+    flex_printing = flex_printing.filter(fp => !isMatch(fp.campaign_id, id, rawId));
     await queueSave();
     res.json({ ok: true });
   }));
