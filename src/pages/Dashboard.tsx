@@ -102,6 +102,7 @@ export default function Dashboard() {
     if (isConfirmed) {
       try {
         await campaignService.delete(id);
+        setCampaigns(prev => prev.filter(c => Number(c.id) !== Number(id)));
         await fetchData();
         return true;
       } catch (error: any) {

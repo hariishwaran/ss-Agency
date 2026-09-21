@@ -443,7 +443,7 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
                     onClick={async () => {
                        if (onDelete) {
                          const success = await onDelete(campaign.id);
-                         if (success === true) onClose();
+                         if (success !== false) onClose();
                        }
                     }}
                     className="p-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all border border-red-100"

@@ -44,7 +44,7 @@ export default function CampaignDetailView({ campaign, onClose, onDelete }: Camp
     try {
       setIsDeleting(true);
       const success = await onDelete(campaign.id);
-      if (success === true) onClose();
+      if (success !== false) onClose();
     } catch (error) {
       console.error('Error deleting campaign:', error);
     } finally {

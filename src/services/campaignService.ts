@@ -28,7 +28,8 @@ export const campaignService = {
 
   async delete(id: number) {
     console.log('Initiating delete sequence for campaign ID:', id);
-    await api.delete(`/campaigns/${id}`);
-    console.log('Campaign successfully deleted');
+    const res = await api.delete<{ ok: boolean }>(`/campaigns/${id}`);
+    console.log('Campaign successfully deleted:', res);
+    return res;
   }
 };

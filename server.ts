@@ -464,11 +464,12 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   app.delete("/api/hoardings/:id", requireAuth, asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    hoardings = hoardings.filter(h => h.id !== id);
-    ledger = ledger.filter(l => l.hoarding_id !== id);
-    campaigns = campaigns.filter(c => c.hoarding_id !== id);
-    flex_printing = flex_printing.filter(fp => fp.hoarding_id !== id);
-    purchase_orders = purchase_orders.filter(po => po.hoarding_id !== id);
+    const rawId = String(req.params.id);
+    hoardings = hoardings.filter(h => Number(h.id) !== id && String(h.id) !== rawId);
+    ledger = ledger.filter(l => Number(l.hoarding_id) !== id && String(l.hoarding_id) !== rawId);
+    campaigns = campaigns.filter(c => Number(c.hoarding_id) !== id && String(c.hoarding_id) !== rawId);
+    flex_printing = flex_printing.filter(fp => Number(fp.hoarding_id) !== id && String(fp.hoarding_id) !== rawId);
+    purchase_orders = purchase_orders.filter(po => Number(po.hoarding_id) !== id && String(po.hoarding_id) !== rawId);
     await queueSave();
     res.json({ ok: true });
   }));
@@ -532,10 +533,11 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   app.delete("/api/campaigns/:id", requireAuth, asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    campaigns = campaigns.filter(c => c.id !== id);
-    purchase_orders = purchase_orders.filter(po => po.campaign_id !== id);
-    ledger = ledger.filter(l => l.campaign_id !== id);
-    flex_printing = flex_printing.filter(fp => fp.campaign_id !== id);
+    const rawId = String(req.params.id);
+    campaigns = campaigns.filter(c => Number(c.id) !== id && String(c.id) !== rawId);
+    purchase_orders = purchase_orders.filter(po => Number(po.campaign_id) !== id && String(po.campaign_id) !== rawId);
+    ledger = ledger.filter(l => Number(l.campaign_id) !== id && String(l.campaign_id) !== rawId);
+    flex_printing = flex_printing.filter(fp => Number(fp.campaign_id) !== id && String(fp.campaign_id) !== rawId);
     await queueSave();
     res.json({ ok: true });
   }));

@@ -136,6 +136,7 @@ export default function Campaigns() {
       try {
         setDeletingId(id);
         await campaignService.delete(id);
+        setCampaigns(prev => prev.filter(c => Number(c.id) !== Number(id)));
         await fetchData();
         return true;
       } catch (error: any) {
