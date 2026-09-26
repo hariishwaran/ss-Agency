@@ -123,19 +123,7 @@ export default function SiteDetails() {
 
   const handleCreateCampaign = async (formData: any) => {
     try {
-      if (formData.hoarding_ids && formData.hoarding_ids.length > 0) {
-        await Promise.all(formData.hoarding_ids.map((hId: number) => 
-          campaignService.create({
-            client_info: formData.client_info,
-            start_date: formData.start_date,
-            end_date: formData.end_date,
-            hoarding_id: hId,
-            internal_notes: formData.internal_notes
-          })
-        ));
-      } else {
-        await campaignService.create(formData);
-      }
+      await campaignService.create(formData);
       setIsModalOpen(false);
       navigate('/campaigns');
     } catch (error) {

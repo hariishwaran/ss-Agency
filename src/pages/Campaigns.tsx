@@ -92,23 +92,9 @@ export default function Campaigns() {
 
   const handleCreateCampaign = async (formData: any) => {
     try {
-      if (formData.hoarding_ids && formData.hoarding_ids.length > 0) {
-        // Create multiple campaigns
-        await Promise.all(formData.hoarding_ids.map((id: number) => 
-          campaignService.create({
-            client_info: formData.client_info,
-            start_date: formData.start_date,
-            end_date: formData.end_date,
-            hoarding_id: id,
-            internal_notes: formData.internal_notes
-          })
-        ));
-      } else {
-        // Fallback for single create if needed
-        await campaignService.create(formData);
-      }
+      await campaignService.create(formData);
       setIsModalOpen(false);
-      fetchData();
+      await fetchData();
     } catch (error) {
       console.error('Error creating campaign:', error);
     }

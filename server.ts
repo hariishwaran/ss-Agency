@@ -524,22 +524,47 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   app.post("/api/campaigns", requireAuth, asyncHandler(async (req, res) => {
     const d = req.body;
-    const nextId = campaigns.length > 0 ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
-    const newCampaign = {
-      id: nextId,
-      client_info: d.client_info,
-      start_date: d.start_date,
-      end_date: d.end_date,
-      hoarding_id: Number(d.hoarding_id),
-      internal_notes: d.internal_notes ?? null,
-      po_status: "none" as const,
-      total_po_amount: 0,
-      paid_po_amount: 0,
-      created_at: new Date().toISOString()
-    };
-    campaigns.push(newCampaign);
+    let targetHoardingIds: number[] = [];
+
+    if (Array.isArray(d.hoarding_ids) && d.hoarding_ids.length > 0) {
+      targetHoardingIds = d.hoarding_ids.map((h: any) => Number(h)).filter((n: number) => !isNaN(n));
+    } else if (d.hoarding_id !== undefined && d.hoarding_id !== null) {
+      const singleId = Number(d.hoarding_id);
+      if (!isNaN(singleId)) targetHoardingIds = [singleId];
+    }
+
+    if (targetHoardingIds.length === 0) {
+      res.status(400).json({ error: "At least one valid hoarding location is required" });
+      return;
+    }
+
+    const createdCampaigns: any[] = [];
+    let currentNextId = campaigns.length > 0 ? Math.max(...campaigns.map(c => Number(c.id) || 0)) + 1 : 1;
+
+    for (const hoardingId of targetHoardingIds) {
+      const newCampaign = {
+        id: currentNextId++,
+        client_info: d.client_info,
+        start_date: d.start_date,
+        end_date: d.end_date,
+        hoarding_id: hoardingId,
+        internal_notes: d.internal_notes ?? null,
+        po_status: (d.po_status || "none") as any,
+        total_po_amount: Number(d.total_po_amount) || 0,
+        paid_po_amount: Number(d.paid_po_amount) || 0,
+        created_at: new Date().toISOString()
+      };
+      campaigns.push(newCampaign);
+      createdCampaigns.push(newCampaign);
+    }
+
     await queueSave();
-    res.status(201).json(newCampaign);
+
+    if (createdCampaigns.length === 1) {
+      res.status(201).json(createdCampaigns[0]);
+    } else {
+      res.status(201).json(createdCampaigns);
+    }
   }));
 
   app.put("/api/campaigns/:id", requireAuth, asyncHandler(async (req, res) => {
