@@ -42,6 +42,13 @@ export default function SiteDetails() {
     if (id) {
       loadHoarding();
       loadRelatedData();
+      const interval = setInterval(loadRelatedData, 4000);
+      const handleFocus = () => loadRelatedData();
+      window.addEventListener('focus', handleFocus);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
     }
   }, [id]);
 

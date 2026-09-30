@@ -37,8 +37,8 @@ const asyncHandler =
   (req: Request, res: Response, next: NextFunction) =>
     fn(req, res, next).catch(next);
 
-async function loadDb(): Promise<DatabaseState> {
-  if (dbCache) {
+async function loadDb(forceReload = false): Promise<DatabaseState> {
+  if (dbCache && !forceReload) {
     return dbCache;
   }
 
@@ -82,7 +82,6 @@ async function loadDb(): Promise<DatabaseState> {
     if (fs.existsSync(DB_PATH)) {
       const content = fs.readFileSync(DB_PATH, "utf-8");
       dbCache = JSON.parse(content);
-      console.log("✅ Database loaded successfully from data/db.json");
       return dbCache!;
     }
   } catch (err: any) {
@@ -199,8 +198,8 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
   return false;
 }
 
-async function initDbState() {
-  const db = await loadDb();
+async function initDbState(forceReload = true) {
+  const db = await loadDb(forceReload);
   users = db.users || [];
   owners = db.owners || [];
   hoardings = db.hoardings || [];

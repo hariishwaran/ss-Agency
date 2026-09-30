@@ -28,11 +28,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 4000);
+    const handleFocus = () => fetchData();
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const fetchData = async () => {
     try {
-      setIsLoading(true);
       setConfigError(null);
       const [campaignsData, hoardingsData] = await Promise.all([
         campaignService.getAll(),
