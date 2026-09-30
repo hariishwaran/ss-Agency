@@ -36,84 +36,85 @@ const asyncHandler =
   (req: Request, res: Response, next: NextFunction) =>
     fn(req, res, next).catch(next);
 
-function loadDbSync(): DatabaseState {
-  if (dbCache) return dbCache;
+async function loadDb(forceReload = false): Promise<DatabaseState> {
+  if (dbCache && !forceReload && !process.env.VERCEL) {
+    return dbCache;
+  }
 
-  dbCache = {
-    users: [],
-    owners: [],
-    hoardings: [],
-    campaigns: [],
-    purchase_orders: [],
-    ledger: [],
-    flex_printing: []
-  };
-
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const content = fs.readFileSync(DB_PATH, "utf-8");
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed.users)) dbCache.users = parsed.users;
-      if (Array.isArray(parsed.owners)) dbCache.owners = parsed.owners;
-      if (Array.isArray(parsed.hoardings)) dbCache.hoardings = parsed.hoardings;
-      if (Array.isArray(parsed.campaigns)) dbCache.campaigns = parsed.campaigns;
-      if (Array.isArray(parsed.purchase_orders)) dbCache.purchase_orders = parsed.purchase_orders;
-      if (Array.isArray(parsed.ledger)) dbCache.ledger = parsed.ledger;
-      if (Array.isArray(parsed.flex_printing)) dbCache.flex_printing = parsed.flex_printing;
-      console.log(`✅ Database loaded into memory (${dbCache.campaigns.length} campaigns)`);
-    } else if (GITHUB_TOKEN) {
-      console.log("Downloading database from GitHub API for initial setup...");
-      fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`, {
+  // 1. If GITHUB_TOKEN is available, load authoritative dataset from GitHub REST API
+  if (GITHUB_TOKEN) {
+    try {
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}&t=${Date.now()}`;
+      const res = await fetch(url, {
         headers: {
           Authorization: `token ${GITHUB_TOKEN}`,
           Accept: "application/vnd.github.v3+json",
+          "Cache-Control": "no-cache",
         },
-      }).then(res => res.ok ? res.json() : null).then(data => {
-        if (data && data.content) {
-          const decoded = Buffer.from(data.content, "base64").toString("utf-8");
-          const parsed = JSON.parse(decoded);
-          dbCache!.users = parsed.users || [];
-          dbCache!.owners = parsed.owners || [];
-          dbCache!.hoardings = parsed.hoardings || [];
-          dbCache!.campaigns = parsed.campaigns || [];
-          dbCache!.purchase_orders = parsed.purchase_orders || [];
-          dbCache!.ledger = parsed.ledger || [];
-          dbCache!.flex_printing = parsed.flex_printing || [];
-          users = dbCache!.users || [];
-          owners = dbCache!.owners;
-          hoardings = dbCache!.hoardings;
-          campaigns = dbCache!.campaigns;
-          purchase_orders = dbCache!.purchase_orders;
-          ledger = dbCache!.ledger;
-          flex_printing = dbCache!.flex_printing;
-          fs.writeFileSync(DB_PATH, decoded, "utf-8");
-          console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub API`);
-        }
-      }).catch(err => console.error("Initial GitHub load error:", err.message));
+      });
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        const decoded = Buffer.from(data.content, "base64").toString("utf-8");
+        dbCache = JSON.parse(decoded);
+        syncGlobalsFromCache();
+        console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub REST API`);
+        return dbCache!;
+      }
+    } catch (err: any) {
+      console.warn("GitHub API load warning:", err.message);
+    }
+  }
+
+  // 2. Try raw GitHub public file URL as fallback
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE_PATH}?t=${Date.now()}`;
+    const rawRes = await fetch(rawUrl, { headers: { "Cache-Control": "no-cache" } });
+    if (rawRes.ok) {
+      const content = await rawRes.text();
+      dbCache = JSON.parse(content);
+      syncGlobalsFromCache();
+      console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub raw content`);
+      return dbCache!;
+    }
+  } catch (err: any) {
+    console.warn("Raw GitHub URL load warning:", err.message);
+  }
+
+  // 3. Fallback: local disk file data/db.json
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const content = fs.readFileSync(DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      syncGlobalsFromCache();
+      return dbCache!;
     }
   } catch (err: any) {
     console.error("Error loading db from local file:", err.message);
   }
 
-  users = dbCache.users || [];
-  owners = dbCache.owners;
-  hoardings = dbCache.hoardings;
-  campaigns = dbCache.campaigns;
-  purchase_orders = dbCache.purchase_orders;
-  ledger = dbCache.ledger;
-  flex_printing = dbCache.flex_printing;
+  if (!dbCache) {
+    dbCache = { users: [], owners: [], hoardings: [], campaigns: [], purchase_orders: [], ledger: [], flex_printing: [] };
+    syncGlobalsFromCache();
+  }
 
   return dbCache;
 }
 
-// Initial load on server startup
-loadDbSync();
-
-let gitHubPushTimeout: NodeJS.Timeout | null = null;
+function syncGlobalsFromCache() {
+  if (!dbCache) return;
+  users = Array.isArray(dbCache.users) ? dbCache.users : [];
+  owners = Array.isArray(dbCache.owners) ? dbCache.owners : [];
+  hoardings = Array.isArray(dbCache.hoardings) ? dbCache.hoardings : [];
+  campaigns = Array.isArray(dbCache.campaigns) ? dbCache.campaigns : [];
+  purchase_orders = Array.isArray(dbCache.purchase_orders) ? dbCache.purchase_orders : [];
+  ledger = Array.isArray(dbCache.ledger) ? dbCache.ledger : [];
+  flex_printing = Array.isArray(dbCache.flex_printing) ? dbCache.flex_printing : [];
+}
 
 async function saveDb(): Promise<void> {
-  if (!dbCache) return;
-
+  if (!dbCache) {
+    dbCache = { users: [], owners: [], hoardings: [], campaigns: [], purchase_orders: [], ledger: [], flex_printing: [] };
+  }
   dbCache.users = users;
   dbCache.owners = owners;
   dbCache.hoardings = hoardings;
@@ -124,64 +125,59 @@ async function saveDb(): Promise<void> {
 
   const jsonString = JSON.stringify(dbCache, null, 2);
 
-  // 1. Synchronously write to local disk data/db.json
+  // 1. Save to local disk if directory is writable
   try {
     const dir = path.dirname(DB_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
-    console.log(`✅ Saved database to data/db.json (${campaigns.length} campaigns)`);
+    console.log(`✅ Saved ${campaigns.length} campaigns to data/db.json`);
   } catch (err: any) {
-    console.error("Could not write database to data/db.json:", err.message);
+    // Ephemeral disk write notice
   }
 
-  // 2. Debounced background commit to GitHub repository if GITHUB_TOKEN is available
+  // 2. Commit directly to GitHub API (AWAITED to guarantee cross-instance Vercel persistence)
   if (GITHUB_TOKEN) {
-    if (gitHubPushTimeout) clearTimeout(gitHubPushTimeout);
-    gitHubPushTimeout = setTimeout(() => {
-      pushToGitHubAsync(jsonString);
-    }, 2000);
-  }
-}
+    try {
+      console.log("Saving updated database to GitHub API...");
+      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+      const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}&t=${Date.now()}`, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Cache-Control": "no-cache",
+        },
+      });
 
-async function pushToGitHubAsync(jsonString: string) {
-  try {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
-    const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    });
+      let sha: string | undefined;
+      if (getFileRes.ok) {
+        const metadata = (await getFileRes.json()) as any;
+        sha = metadata.sha;
+      }
 
-    let sha: string | undefined;
-    if (getFileRes.ok) {
-      const metadata = (await getFileRes.json()) as any;
-      sha = metadata.sha;
+      const putRes = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "db: update database [skip ci]",
+          content: Buffer.from(jsonString).toString("base64"),
+          sha,
+          branch: GITHUB_BRANCH,
+        }),
+      });
+
+      if (putRes.ok) {
+        console.log("✅ Database committed successfully to GitHub API");
+      } else {
+        const errDetail = await putRes.text();
+        console.warn(`GitHub API commit response (${putRes.status}): ${errDetail}`);
+      }
+    } catch (err: any) {
+      console.error("Error committing database to GitHub:", err.message);
     }
-
-    const putRes = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
-        Accept: "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: "db: update database [skip ci]",
-        content: Buffer.from(jsonString).toString("base64"),
-        sha,
-        branch: GITHUB_BRANCH,
-      }),
-    });
-
-    if (putRes.ok) {
-      console.log("✅ Database committed successfully to GitHub API");
-    } else {
-      const errDetail = await putRes.text();
-      console.warn(`GitHub API commit notice (${putRes.status}): ${errDetail}`);
-    }
-  } catch (err: any) {
-    console.warn("GitHub API background push notice:", err.message);
   }
 }
 
@@ -197,7 +193,7 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
 }
 
 async function initDbState() {
-  loadDbSync();
+  await loadDb(Boolean(process.env.VERCEL));
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
