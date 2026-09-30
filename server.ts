@@ -42,7 +42,18 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
     return dbCache;
   }
 
-  // 1. If GITHUB_TOKEN is present, fetch the authoritative database from GitHub API
+  // 1. Read from local disk data/db.json (fast & synchronous local persistence)
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const content = fs.readFileSync(DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      return dbCache!;
+    }
+  } catch (err: any) {
+    console.error("Error loading db from local file:", err.message);
+  }
+
+  // 2. If local file doesn't exist yet, fetch from GitHub API
   if (GITHUB_TOKEN) {
     try {
       console.log("Loading database from GitHub API...");
@@ -73,19 +84,8 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
         console.error(`Failed to load db from GitHub (${res.status}): ${res.statusText}`);
       }
     } catch (err: any) {
-      console.error("Error loading db from GitHub, falling back to local file:", err.message);
+      console.error("Error loading db from GitHub:", err.message);
     }
-  }
-
-  // 2. Load from local disk data/db.json
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const content = fs.readFileSync(DB_PATH, "utf-8");
-      dbCache = JSON.parse(content);
-      return dbCache!;
-    }
-  } catch (err: any) {
-    console.error("Error loading db:", err.message);
   }
 
   dbCache = {
@@ -198,7 +198,7 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
   return false;
 }
 
-async function initDbState(forceReload = true) {
+async function initDbState(forceReload = false) {
   const db = await loadDb(forceReload);
   users = db.users || [];
   owners = db.owners || [];
