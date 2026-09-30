@@ -821,7 +821,12 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     if (process.env.NODE_ENV !== "production") {
       const { createServer: createViteServer } = await import("vite");
       const vite = await createViteServer({
-        server: { middlewareMode: true },
+        server: {
+          middlewareMode: true,
+          watch: {
+            ignored: ["**/data/**", "**/data/db.json"],
+          },
+        },
         appType: "spa",
       });
       app.use(vite.middlewares);
