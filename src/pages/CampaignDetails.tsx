@@ -51,11 +51,17 @@ export default function CampaignDetails() {
       setCampaign(campaignData);
       if (campaignData) {
         const [hoardingData, poData] = await Promise.all([
-          hoardingService.getById(campaignData.hoarding_id),
-          purchaseOrderService.getByCampaignId(campaignData.id)
+          hoardingService.getById(campaignData.hoarding_id).catch(err => {
+            console.warn('Failed to load hoarding for campaign:', err);
+            return null;
+          }),
+          purchaseOrderService.getByCampaignId(campaignData.id).catch(err => {
+            console.warn('Failed to load purchase orders for campaign:', err);
+            return [];
+          })
         ]);
         setHoarding(hoardingData);
-        setPurchaseOrders(poData);
+        setPurchaseOrders(poData || []);
       }
     } catch (error) {
       console.error('Failed to load campaign details', error);
