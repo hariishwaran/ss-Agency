@@ -4,7 +4,6 @@ import fs from "fs";
 
 // ─── Database Setup (GitHub API & Single Local JSON File: data/db.json) ───────
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
-const TMP_DB_PATH = path.join("/tmp", "admanager_db.json");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || "hariishwaran";
@@ -37,56 +36,8 @@ const asyncHandler =
   (req: Request, res: Response, next: NextFunction) =>
     fn(req, res, next).catch(next);
 
-async function loadDb(forceReload = false): Promise<DatabaseState> {
-  if (dbCache && !forceReload) {
-    return dbCache;
-  }
-
-  // 1. Read from local disk data/db.json (fast & synchronous local persistence)
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const content = fs.readFileSync(DB_PATH, "utf-8");
-      dbCache = JSON.parse(content);
-      return dbCache!;
-    }
-  } catch (err: any) {
-    console.error("Error loading db from local file:", err.message);
-  }
-
-  // 2. If local file doesn't exist yet, fetch from GitHub API
-  if (GITHUB_TOKEN) {
-    try {
-      console.log("Loading database from GitHub API...");
-      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`;
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github.v3+json",
-        },
-      });
-      if (res.ok) {
-        const data = (await res.json()) as any;
-        const decoded = Buffer.from(data.content, "base64").toString("utf-8");
-        dbCache = JSON.parse(decoded);
-        console.log("✅ Database loaded successfully from GitHub API");
-
-        // Sync local disk copy
-        try {
-          const dir = path.dirname(DB_PATH);
-          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-          fs.writeFileSync(DB_PATH, decoded, "utf-8");
-        } catch (e: any) {
-          console.warn("Could not sync disk from GitHub load:", e.message);
-        }
-
-        return dbCache!;
-      } else {
-        console.error(`Failed to load db from GitHub (${res.status}): ${res.statusText}`);
-      }
-    } catch (err: any) {
-      console.error("Error loading db from GitHub:", err.message);
-    }
-  }
+function loadDbSync(): DatabaseState {
+  if (dbCache) return dbCache;
 
   dbCache = {
     users: [],
@@ -97,98 +48,145 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
     ledger: [],
     flex_printing: []
   };
+
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const content = fs.readFileSync(DB_PATH, "utf-8");
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed.users)) dbCache.users = parsed.users;
+      if (Array.isArray(parsed.owners)) dbCache.owners = parsed.owners;
+      if (Array.isArray(parsed.hoardings)) dbCache.hoardings = parsed.hoardings;
+      if (Array.isArray(parsed.campaigns)) dbCache.campaigns = parsed.campaigns;
+      if (Array.isArray(parsed.purchase_orders)) dbCache.purchase_orders = parsed.purchase_orders;
+      if (Array.isArray(parsed.ledger)) dbCache.ledger = parsed.ledger;
+      if (Array.isArray(parsed.flex_printing)) dbCache.flex_printing = parsed.flex_printing;
+      console.log(`✅ Database loaded into memory (${dbCache.campaigns.length} campaigns)`);
+    } else if (GITHUB_TOKEN) {
+      console.log("Downloading database from GitHub API for initial setup...");
+      fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }).then(res => res.ok ? res.json() : null).then(data => {
+        if (data && data.content) {
+          const decoded = Buffer.from(data.content, "base64").toString("utf-8");
+          const parsed = JSON.parse(decoded);
+          dbCache!.users = parsed.users || [];
+          dbCache!.owners = parsed.owners || [];
+          dbCache!.hoardings = parsed.hoardings || [];
+          dbCache!.campaigns = parsed.campaigns || [];
+          dbCache!.purchase_orders = parsed.purchase_orders || [];
+          dbCache!.ledger = parsed.ledger || [];
+          dbCache!.flex_printing = parsed.flex_printing || [];
+          users = dbCache!.users || [];
+          owners = dbCache!.owners;
+          hoardings = dbCache!.hoardings;
+          campaigns = dbCache!.campaigns;
+          purchase_orders = dbCache!.purchase_orders;
+          ledger = dbCache!.ledger;
+          flex_printing = dbCache!.flex_printing;
+          fs.writeFileSync(DB_PATH, decoded, "utf-8");
+          console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub API`);
+        }
+      }).catch(err => console.error("Initial GitHub load error:", err.message));
+    }
+  } catch (err: any) {
+    console.error("Error loading db from local file:", err.message);
+  }
+
+  users = dbCache.users || [];
+  owners = dbCache.owners;
+  hoardings = dbCache.hoardings;
+  campaigns = dbCache.campaigns;
+  purchase_orders = dbCache.purchase_orders;
+  ledger = dbCache.ledger;
+  flex_printing = dbCache.flex_printing;
+
   return dbCache;
 }
 
-async function saveDb(state: DatabaseState): Promise<void> {
-  dbCache = state;
-  const jsonString = JSON.stringify(state, null, 2);
+// Initial load on server startup
+loadDbSync();
 
-  // 1. Write to local disk data/db.json
+let gitHubPushTimeout: NodeJS.Timeout | null = null;
+
+async function saveDb(): Promise<void> {
+  if (!dbCache) return;
+
+  dbCache.users = users;
+  dbCache.owners = owners;
+  dbCache.hoardings = hoardings;
+  dbCache.campaigns = campaigns;
+  dbCache.purchase_orders = purchase_orders;
+  dbCache.ledger = ledger;
+  dbCache.flex_printing = flex_printing;
+
+  const jsonString = JSON.stringify(dbCache, null, 2);
+
+  // 1. Synchronously write to local disk data/db.json
   try {
     const dir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
-    console.log("✅ Database saved to data/db.json");
+    console.log(`✅ Saved database to data/db.json (${campaigns.length} campaigns)`);
   } catch (err: any) {
     console.error("Could not write database to data/db.json:", err.message);
-    try {
-      fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
-      console.log("✅ Database saved to /tmp fallback");
-    } catch (tmpErr: any) {
-      console.error("Could not write database to /tmp fallback:", tmpErr.message);
-    }
   }
 
-  // 2. Push commit to GitHub repository if GITHUB_TOKEN is available
+  // 2. Debounced background commit to GitHub repository if GITHUB_TOKEN is available
   if (GITHUB_TOKEN) {
-    try {
-      console.log("Saving database to GitHub API...");
-      const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
-
-      const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
-        headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github.v3+json",
-        },
-      });
-
-      let sha: string | undefined;
-      if (getFileRes.ok) {
-        const metadata = (await getFileRes.json()) as any;
-        sha = metadata.sha;
-      }
-
-      const putRes = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github.v3+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: "db: update database [skip ci]",
-          content: Buffer.from(jsonString).toString("base64"),
-          sha,
-          branch: GITHUB_BRANCH,
-        }),
-      });
-
-      if (putRes.ok) {
-        console.log("✅ Database committed successfully to GitHub API");
-      } else {
-        const errDetail = await putRes.text();
-        console.error(`Failed to commit database to GitHub (${putRes.status}): ${errDetail}`);
-      }
-    } catch (err: any) {
-      console.error("Error committing database to GitHub:", err.message);
-    }
+    if (gitHubPushTimeout) clearTimeout(gitHubPushTimeout);
+    gitHubPushTimeout = setTimeout(() => {
+      pushToGitHubAsync(jsonString);
+    }, 2000);
   }
 }
 
-let isSaving = false;
-let saveQueue: DatabaseState[] = [];
+async function pushToGitHubAsync(jsonString: string) {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+    const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+
+    let sha: string | undefined;
+    if (getFileRes.ok) {
+      const metadata = (await getFileRes.json()) as any;
+      sha = metadata.sha;
+    }
+
+    const putRes = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: "db: update database [skip ci]",
+        content: Buffer.from(jsonString).toString("base64"),
+        sha,
+        branch: GITHUB_BRANCH,
+      }),
+    });
+
+    if (putRes.ok) {
+      console.log("✅ Database committed successfully to GitHub API");
+    } else {
+      const errDetail = await putRes.text();
+      console.warn(`GitHub API commit notice (${putRes.status}): ${errDetail}`);
+    }
+  } catch (err: any) {
+    console.warn("GitHub API background push notice:", err.message);
+  }
+}
 
 async function queueSave() {
-  const state = { users, owners, hoardings, campaigns, purchase_orders, ledger, flex_printing };
-  dbCache = state;
-  if (isSaving) {
-    saveQueue.push(state);
-    return;
-  }
-  isSaving = true;
-  try {
-    await saveDb(state);
-  } finally {
-    isSaving = false;
-    if (saveQueue.length > 0) {
-      const nextState = saveQueue[saveQueue.length - 1];
-      saveQueue = [];
-      await saveDb(nextState);
-    }
-  }
+  await saveDb();
 }
 
 function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boolean {
@@ -198,15 +196,8 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
   return false;
 }
 
-async function initDbState(forceReload = false) {
-  const db = await loadDb(forceReload);
-  users = db.users || [];
-  owners = db.owners || [];
-  hoardings = db.hoardings || [];
-  campaigns = db.campaigns || [];
-  purchase_orders = db.purchase_orders || [];
-  ledger = db.ledger || [];
-  flex_printing = db.flex_printing || [];
+async function initDbState() {
+  loadDbSync();
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
