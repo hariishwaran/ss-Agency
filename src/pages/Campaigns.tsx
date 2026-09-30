@@ -98,7 +98,15 @@ export default function Campaigns() {
 
   const handleCreateCampaign = async (formData: any) => {
     try {
-      await campaignService.create(formData);
+      const created = await campaignService.create(formData);
+      const createdList = Array.isArray(created) ? created : [created];
+      
+      setCampaigns(prev => {
+        const existingIds = new Set(prev.map(c => c.id));
+        const toAdd = createdList.filter(c => !existingIds.has(c.id));
+        return [...toAdd, ...prev];
+      });
+      setFilter('all');
       setIsModalOpen(false);
       await fetchData();
     } catch (error) {
@@ -108,10 +116,11 @@ export default function Campaigns() {
 
   const handleUpdateCampaign = async (id: number, updatedData: Partial<Campaign>) => {
     try {
-      await campaignService.update(id, updatedData);
+      const updated = await campaignService.update(id, updatedData);
+      setCampaigns(prev => prev.map(c => c.id === id ? { ...c, ...updated } : c));
       setIsModalOpen(false);
       setEditingCampaign(null);
-      fetchData();
+      await fetchData();
     } catch (error) {
       console.error('Error updating campaign:', error);
     }
@@ -156,8 +165,9 @@ export default function Campaigns() {
     .filter(c => {
       const status = getStatus(c.start_date, c.end_date);
       const matchesFilter = filter === 'all' || status === filter;
+      const siteLoc = hoardings[c.hoarding_id]?.location || '';
       const matchesSearch = c.client_info.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            hoardings[c.hoarding_id]?.location.toLowerCase().includes(searchQuery.toLowerCase());
+                            siteLoc.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     })
     .sort((a, b) => {

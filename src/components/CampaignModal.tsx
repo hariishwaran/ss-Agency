@@ -137,21 +137,25 @@ export default function CampaignModal({ isOpen, onClose, onCreate, onUpdate, onD
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.client_info && formData.start_date && formData.end_date && formData.hoarding_ids.length > 0) {
-      if (campaign && onUpdate) {
-        onUpdate(campaign.id, {
-          client_info: formData.client_info,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          hoarding_id: formData.hoarding_ids[0],
-          internal_notes: formData.internal_notes,
-          po_status: formData.po_status,
-        });
-      } else {
-        // We pass the formData containing hoarding_ids to onCreate
-        onCreate(formData);
+      setIsLoading(true);
+      try {
+        if (campaign && onUpdate) {
+          await onUpdate(campaign.id, {
+            client_info: formData.client_info,
+            start_date: formData.start_date,
+            end_date: formData.end_date,
+            hoarding_id: formData.hoarding_ids[0],
+            internal_notes: formData.internal_notes,
+            po_status: formData.po_status,
+          });
+        } else {
+          await onCreate(formData);
+        }
+      } finally {
+        setIsLoading(false);
       }
     }
   };

@@ -78,9 +78,15 @@ export default function Dashboard() {
 
   const handleCreateCampaign = async (formData: any) => {
     try {
-      await campaignService.create(formData);
-      await fetchData();
+      const created = await campaignService.create(formData);
+      const createdList = Array.isArray(created) ? created : [created];
+      setCampaigns(prev => {
+        const existingIds = new Set(prev.map(c => c.id));
+        const toAdd = createdList.filter(c => !existingIds.has(c.id));
+        return [...toAdd, ...prev];
+      });
       setIsModalOpen(false);
+      await fetchData();
     } catch (error) {
       console.error('Error creating campaign:', error);
     }
