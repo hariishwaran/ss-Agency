@@ -2457,7 +2457,7 @@
     },
     {
       "id": 136,
-      "location": "Viruthunagar  Collector Office ( Towards Viruthu Nagar)  \u2013 L",
+      "location": "Viruthunagar  Collector Office ( Towards Viruthu Nagar)  – L",
       "city": "Viruthunagar",
       "width": 36,
       "height": 25,
@@ -2475,7 +2475,7 @@
     },
     {
       "id": 137,
-      "location": "Viruthunagar Collector Office \u2013 R",
+      "location": "Viruthunagar Collector Office – R",
       "city": "Viruthunagar",
       "width": 36,
       "height": 25,
@@ -3322,64 +3322,28 @@
   ],
   "campaigns": [
     {
-      "id": 1,
-      "client_info": "HDFC Bank Home Loan",
-      "start_date": "2026-08-01",
-      "end_date": "2026-09-30",
-      "hoarding_id": 1,
-      "internal_notes": "Regular campaign, monthly inspection required",
-      "po_status": "paid",
-      "total_po_amount": 120000,
-      "paid_po_amount": 120000,
-      "created_at": "2026-08-21T12:00:29.502Z"
-    },
-    {
-      "id": 2,
-      "client_info": "Airtel 5G Plus Launch",
-      "start_date": "2026-08-15",
-      "end_date": "2026-11-15",
-      "hoarding_id": 1,
-      "internal_notes": "Visible display priority",
-      "po_status": "partial",
-      "total_po_amount": 240000,
-      "paid_po_amount": 80000,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 3,
-      "client_info": "Joyalukkas Onam Festive Sale",
-      "start_date": "2026-08-10",
-      "end_date": "2026-09-10",
-      "hoarding_id": 1,
-      "internal_notes": "Festive banners",
-      "po_status": "pending",
-      "total_po_amount": 90000,
-      "paid_po_amount": 0,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 4,
-      "client_info": "TVS Raider 125 Promo",
-      "start_date": "2026-08-01",
-      "end_date": "2026-08-31",
-      "hoarding_id": 1,
-      "internal_notes": "Agency-owned hoarding promo",
+      "id": 12,
+      "client_info": "one",
+      "start_date": "2026-10-01",
+      "end_date": "2026-10-31",
+      "hoarding_id": 183,
+      "internal_notes": "Upcoming campaign",
       "po_status": "none",
       "total_po_amount": 0,
       "paid_po_amount": 0,
-      "created_at": "2026-08-21T12:00:29.505Z"
+      "created_at": "2026-09-01T10:00:00.000Z"
     },
     {
-      "id": 5,
-      "client_info": "Saravana Stores Aadi Discount",
-      "start_date": "2026-07-15",
-      "end_date": "2026-08-15",
-      "hoarding_id": 1,
-      "internal_notes": "Discount campaign next to store",
-      "po_status": "paid",
-      "total_po_amount": 150000,
-      "paid_po_amount": 150000,
-      "created_at": "2026-08-21T12:00:29.505Z"
+      "id": 13,
+      "client_info": "test",
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-02",
+      "hoarding_id": 181,
+      "internal_notes": "Active campaign",
+      "po_status": "none",
+      "total_po_amount": 0,
+      "paid_po_amount": 0,
+      "created_at": "2026-09-01T11:00:00.000Z"
     },
     {
       "id": 6,
@@ -3406,27 +3370,15 @@
       "created_at": "2026-08-21T12:00:29.505Z"
     },
     {
-      "id": 8,
-      "client_info": "Preethi Zodiac Mixer Grinder",
-      "start_date": "2026-08-05",
-      "end_date": "2026-09-05",
+      "id": 2,
+      "client_info": "Airtel 5G Plus Launch",
+      "start_date": "2026-08-15",
+      "end_date": "2026-11-15",
       "hoarding_id": 1,
-      "internal_notes": "Kitchen appliances promotion",
-      "po_status": "paid",
-      "total_po_amount": 85000,
-      "paid_po_amount": 85000,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 9,
-      "client_info": "Aasan Classes IIT-JEE Admissions",
-      "start_date": "2026-05-01",
-      "end_date": "2026-08-31",
-      "hoarding_id": 1,
-      "internal_notes": "Educational season hoarding",
-      "po_status": "paid",
-      "total_po_amount": 200000,
-      "paid_po_amount": 200000,
+      "internal_notes": "Visible display priority",
+      "po_status": "partial",
+      "total_po_amount": 240000,
+      "paid_po_amount": 80000,
       "created_at": "2026-08-21T12:00:29.505Z"
     },
     {
@@ -3440,6 +3392,54 @@
       "total_po_amount": 0,
       "paid_po_amount": 0,
       "created_at": "2026-08-21T12:00:29.505Z"
+    },
+    {
+      "id": 3,
+      "client_info": "Joyalukkas Onam Festive Sale",
+      "start_date": "2026-08-10",
+      "end_date": "2026-09-10",
+      "hoarding_id": 1,
+      "internal_notes": "Festive banners",
+      "po_status": "pending",
+      "total_po_amount": 90000,
+      "paid_po_amount": 0,
+      "created_at": "2026-08-21T12:00:29.505Z"
+    },
+    {
+      "id": 8,
+      "client_info": "Preethi Zodiac Mixer Grinder",
+      "start_date": "2026-08-05",
+      "end_date": "2026-09-05",
+      "hoarding_id": 1,
+      "internal_notes": "Kitchen appliances promotion",
+      "po_status": "paid",
+      "total_po_amount": 85000,
+      "paid_po_amount": 85000,
+      "created_at": "2026-08-21T12:00:29.505Z"
+    },
+    {
+      "id": 15,
+      "client_info": "test",
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-01",
+      "hoarding_id": 177,
+      "internal_notes": "Active campaign",
+      "po_status": "none",
+      "total_po_amount": 0,
+      "paid_po_amount": 0,
+      "created_at": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": 14,
+      "client_info": "test",
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-01",
+      "hoarding_id": 176,
+      "internal_notes": "Active campaign",
+      "po_status": "none",
+      "total_po_amount": 0,
+      "paid_po_amount": 0,
+      "created_at": "2026-09-01T13:00:00.000Z"
     }
   ],
   "purchase_orders": [

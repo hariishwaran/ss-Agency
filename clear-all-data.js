@@ -1,40 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
-const supabaseUrl = 'https://znbgocfkaedkepblwivc.supabase.co';
-const supabaseKey = 'sb_publishable_q1WIBSIzHV4lNdg3nEcdnQ_gDDDLPn4';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
 
-// Delete in order: child tables first, then parent tables
-const tables = [
-  'flex_printing',
-  'purchase_orders',
-  'ledger',
-  'campaigns',
-  'hoardings',
-  'notifications',
-];
+function clearAllData() {
+  console.log('🗑️  Clearing ALL data from data/db.json...\n');
 
-async function clearAllData() {
-  console.log('🗑️  Clearing ALL data from the database...\n');
+  const emptyState = {
+    users: [],
+    owners: [],
+    hoardings: [],
+    campaigns: [],
+    purchase_orders: [],
+    ledger: [],
+    flex_printing: []
+  };
 
-  for (const table of tables) {
-    const { error, count } = await supabase
-      .from(table)
-      .delete()
-      .neq('id', -999999); // deletes all rows
-
-    if (error) {
-      if (error.code === '42P01' || error.message?.includes('does not exist')) {
-        console.log(`⏭️  Table "${table}" does not exist, skipping.`);
-      } else {
-        console.error(`❌ Error clearing "${table}":`, error.message);
-      }
-    } else {
-      console.log(`✅ Cleared table: ${table}`);
-    }
-  }
-
-  console.log('\n🎉 All data has been wiped from the database!');
+  fs.writeFileSync(DB_PATH, JSON.stringify(emptyState, null, 2), 'utf-8');
+  console.log('🎉 All data has been wiped from data/db.json!');
 }
 
 clearAllData();

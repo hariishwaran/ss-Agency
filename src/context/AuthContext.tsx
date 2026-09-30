@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { api } from '../lib/api';
+import { clearLocalCampaignCache } from '../services/campaignService';
 
 export interface LocalUser {
   id: string;
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((u) => setUser(u))
       .catch(() => {
         localStorage.removeItem('auth_token');
+        clearLocalCampaignCache();
       })
       .finally(() => setLoading(false));
   }, []);
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     localStorage.removeItem('auth_token');
+    clearLocalCampaignCache();
     setUser(null);
   };
 

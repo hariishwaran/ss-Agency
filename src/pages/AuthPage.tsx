@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { LogIn, UserPlus, Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { clearLocalCampaignCache } from '../services/campaignService';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -42,6 +43,7 @@ export default function AuthPage() {
 
       const { token } = await res.json();
       localStorage.setItem('auth_token', token);
+      clearLocalCampaignCache();
       // Reload page to initiate authenticated app session
       window.location.href = '/';
     } catch (err: any) {

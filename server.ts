@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
 
-// ─── Database Setup (GitHub & Local File System Mode) ───────────────────────────
+// ─── Database Setup (GitHub API & Single Local JSON File: data/db.json) ───────
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
 const TMP_DB_PATH = path.join("/tmp", "admanager_db.json");
 
@@ -42,18 +42,7 @@ async function loadDb(): Promise<DatabaseState> {
     return dbCache;
   }
 
-  // 1. Try /tmp/admanager_db.json if it exists
-  try {
-    if (fs.existsSync(TMP_DB_PATH)) {
-      const content = fs.readFileSync(TMP_DB_PATH, "utf-8");
-      dbCache = JSON.parse(content);
-      console.log("✅ Database loaded successfully from /tmp");
-      return dbCache!;
-    }
-  } catch (err: any) {
-    console.warn("Could not read from /tmp:", err.message);
-  }
-
+  // 1. If GITHUB_TOKEN is present, fetch the authoritative database from GitHub API
   if (GITHUB_TOKEN) {
     try {
       console.log("Loading database from GitHub API...");
@@ -65,10 +54,20 @@ async function loadDb(): Promise<DatabaseState> {
         },
       });
       if (res.ok) {
-        const data = await res.json() as any;
+        const data = (await res.json()) as any;
         const decoded = Buffer.from(data.content, "base64").toString("utf-8");
         dbCache = JSON.parse(decoded);
-        console.log("✅ Database loaded successfully from GitHub");
+        console.log("✅ Database loaded successfully from GitHub API");
+
+        // Sync local disk copy
+        try {
+          const dir = path.dirname(DB_PATH);
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(DB_PATH, decoded, "utf-8");
+        } catch (e: any) {
+          console.warn("Could not sync disk from GitHub load:", e.message);
+        }
+
         return dbCache!;
       } else {
         console.error(`Failed to load db from GitHub (${res.status}): ${res.statusText}`);
@@ -78,54 +77,58 @@ async function loadDb(): Promise<DatabaseState> {
     }
   }
 
-  // Fallback to local file system
+  // 2. Load from local disk data/db.json
   try {
-    console.log("Loading database from local disk...");
-    const content = fs.readFileSync(DB_PATH, "utf-8");
-    dbCache = JSON.parse(content);
-    console.log("✅ Database loaded successfully from disk");
-    return dbCache!;
+    if (fs.existsSync(DB_PATH)) {
+      const content = fs.readFileSync(DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      console.log("✅ Database loaded successfully from data/db.json");
+      return dbCache!;
+    }
   } catch (err: any) {
-    console.error("Error loading db from disk:", err.message);
-    dbCache = {
-      users: [],
-      owners: [],
-      hoardings: [],
-      campaigns: [],
-      purchase_orders: [],
-      ledger: [],
-      flex_printing: []
-    };
-    return dbCache!;
+    console.error("Error loading db:", err.message);
   }
+
+  dbCache = {
+    users: [],
+    owners: [],
+    hoardings: [],
+    campaigns: [],
+    purchase_orders: [],
+    ledger: [],
+    flex_printing: []
+  };
+  return dbCache;
 }
 
 async function saveDb(state: DatabaseState): Promise<void> {
   dbCache = state;
   const jsonString = JSON.stringify(state, null, 2);
 
-  // Write to /tmp (always writable in serverless environments)
+  // 1. Write to local disk data/db.json
   try {
-    fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
-    console.log("✅ Database saved to /tmp");
-  } catch (err: any) {
-    console.warn("Could not write database to /tmp:", err.message);
-  }
-
-  // Write locally to project disk if writable
-  try {
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
-    console.log("✅ Database saved to local disk");
+    console.log("✅ Database saved to data/db.json");
   } catch (err: any) {
-    console.warn("Could not write database to disk:", err.message);
+    console.error("Could not write database to data/db.json:", err.message);
+    try {
+      fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
+      console.log("✅ Database saved to /tmp fallback");
+    } catch (tmpErr: any) {
+      console.error("Could not write database to /tmp fallback:", tmpErr.message);
+    }
   }
 
-  // Push to GitHub if GITHUB_TOKEN is present
+  // 2. Push commit to GitHub repository if GITHUB_TOKEN is available
   if (GITHUB_TOKEN) {
     try {
       console.log("Saving database to GitHub API...");
       const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
-      
+
       const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
         headers: {
           Authorization: `token ${GITHUB_TOKEN}`,
@@ -135,7 +138,7 @@ async function saveDb(state: DatabaseState): Promise<void> {
 
       let sha: string | undefined;
       if (getFileRes.ok) {
-        const metadata = await getFileRes.json() as any;
+        const metadata = (await getFileRes.json()) as any;
         sha = metadata.sha;
       }
 
@@ -155,7 +158,7 @@ async function saveDb(state: DatabaseState): Promise<void> {
       });
 
       if (putRes.ok) {
-        console.log("✅ Database committed successfully to GitHub");
+        console.log("✅ Database committed successfully to GitHub API");
       } else {
         const errDetail = await putRes.text();
         console.error(`Failed to commit database to GitHub (${putRes.status}): ${errDetail}`);
@@ -804,7 +807,7 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   // ── Health ────────────────────────────────────────────────────────────────
   app.get("/api/health", asyncHandler(async (_req, res) => {
-    res.json({ status: "ok", db: GITHUB_TOKEN ? "github" : "local-disk" });
+    res.json({ status: "ok", db: "json-file" });
   }));
 
   // Serve location images
