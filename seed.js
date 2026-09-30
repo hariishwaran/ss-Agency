@@ -33,7 +33,128 @@ const hoardingsData = [
   created_at: new Date().toISOString()
 }));
 
-const actualCampaigns = [];
+const actualCampaigns = [
+  {
+    id: 12,
+    client_info: 'one',
+    start_date: '2026-10-01',
+    end_date: '2026-10-31',
+    hoarding_id: 1,
+    internal_notes: 'Upcoming campaign',
+    po_status: 'none',
+    total_po_amount: 0,
+    paid_po_amount: 0,
+    created_at: '2026-09-01T10:00:00.000Z'
+  },
+  {
+    id: 13,
+    client_info: 'test',
+    start_date: '2026-09-01',
+    end_date: '2026-10-02',
+    hoarding_id: 1,
+    internal_notes: 'Active campaign',
+    po_status: 'none',
+    total_po_amount: 0,
+    paid_po_amount: 0,
+    created_at: '2026-09-01T11:00:00.000Z'
+  },
+  {
+    id: 6,
+    client_info: 'Pothys Deepavali Celebration',
+    start_date: '2026-09-01',
+    end_date: '2026-10-31',
+    hoarding_id: 1,
+    internal_notes: 'Pre-bookings for festive season',
+    po_status: 'pending',
+    total_po_amount: 300000,
+    paid_po_amount: 0,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 7,
+    client_info: 'Tata EV Punch Launch',
+    start_date: '2026-08-20',
+    end_date: '2026-10-20',
+    hoarding_id: 1,
+    internal_notes: 'Focus on clean energy marketing',
+    po_status: 'partial',
+    total_po_amount: 180000,
+    paid_po_amount: 90000,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 2,
+    client_info: 'Airtel 5G Plus Launch',
+    start_date: '2026-08-15',
+    end_date: '2026-11-15',
+    hoarding_id: 1,
+    internal_notes: 'Visible display priority',
+    po_status: 'partial',
+    total_po_amount: 240000,
+    paid_po_amount: 80000,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 10,
+    client_info: 'Apollo Hospitals Healthcare Checkup',
+    start_date: '2026-08-12',
+    end_date: '2026-09-25',
+    hoarding_id: 1,
+    internal_notes: 'Medical checkup packages promotion',
+    po_status: 'none',
+    total_po_amount: 0,
+    paid_po_amount: 0,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 3,
+    client_info: 'Joyalukkas Onam Festive Sale',
+    start_date: '2026-08-10',
+    end_date: '2026-09-20',
+    hoarding_id: 1,
+    internal_notes: 'Festive banners',
+    po_status: 'pending',
+    total_po_amount: 90000,
+    paid_po_amount: 0,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 8,
+    client_info: 'Preethi Zodiac Mixer Grinder',
+    start_date: '2026-08-05',
+    end_date: '2026-09-05',
+    hoarding_id: 1,
+    internal_notes: 'Kitchen appliances promotion',
+    po_status: 'paid',
+    total_po_amount: 85000,
+    paid_po_amount: 85000,
+    created_at: '2026-08-21T12:00:29.505Z'
+  },
+  {
+    id: 14,
+    client_info: 'test',
+    start_date: '2026-09-01',
+    end_date: '2026-10-01',
+    hoarding_id: 1,
+    internal_notes: null,
+    po_status: 'none',
+    total_po_amount: 0,
+    paid_po_amount: 0,
+    created_at: '2026-09-01T12:00:00.000Z'
+  },
+  {
+    id: 15,
+    client_info: 'test',
+    start_date: '2026-09-01',
+    end_date: '2026-10-01',
+    hoarding_id: 1,
+    internal_notes: null,
+    po_status: 'none',
+    total_po_amount: 0,
+    paid_po_amount: 0,
+    created_at: '2026-09-01T13:00:00.000Z'
+  }
+];
 
 function seedDatabase() {
   console.log('🌱 Seeding data/db.json database with actual dataset...');
