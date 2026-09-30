@@ -37,7 +37,7 @@ const asyncHandler =
     fn(req, res, next).catch(next);
 
 async function loadDb(forceReload = false): Promise<DatabaseState> {
-  if (dbCache && !forceReload && !process.env.VERCEL) {
+  if (dbCache && !forceReload) {
     return dbCache;
   }
 
@@ -583,6 +583,14 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     purchase_orders = purchase_orders.filter(po => !isMatch(po.campaign_id, id, rawId));
     ledger = ledger.filter(l => !isMatch(l.campaign_id, id, rawId));
     flex_printing = flex_printing.filter(fp => !isMatch(fp.campaign_id, id, rawId));
+
+    if (dbCache) {
+      dbCache.campaigns = campaigns;
+      dbCache.purchase_orders = purchase_orders;
+      dbCache.ledger = ledger;
+      dbCache.flex_printing = flex_printing;
+    }
+
     await queueSave();
     res.json({ ok: true });
   }));
