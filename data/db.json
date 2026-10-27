@@ -3336,18 +3336,6 @@
   ],
   "campaigns": [
     {
-      "id": 12,
-      "client_info": "one",
-      "start_date": "2026-10-01",
-      "end_date": "2026-10-31",
-      "hoarding_id": 1,
-      "internal_notes": "Upcoming campaign",
-      "po_status": "none",
-      "total_po_amount": 0,
-      "paid_po_amount": 0,
-      "created_at": "2026-09-01T10:00:00.000Z"
-    },
-    {
       "id": 13,
       "client_info": "test",
       "start_date": "2026-09-01",
@@ -3358,78 +3346,6 @@
       "total_po_amount": 0,
       "paid_po_amount": 0,
       "created_at": "2026-09-01T11:00:00.000Z"
-    },
-    {
-      "id": 6,
-      "client_info": "Pothys Deepavali Celebration",
-      "start_date": "2026-09-01",
-      "end_date": "2026-10-31",
-      "hoarding_id": 1,
-      "internal_notes": "Pre-bookings for festive season",
-      "po_status": "pending",
-      "total_po_amount": 300000,
-      "paid_po_amount": 0,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 7,
-      "client_info": "Tata EV Punch Launch",
-      "start_date": "2026-08-20",
-      "end_date": "2026-10-20",
-      "hoarding_id": 1,
-      "internal_notes": "Focus on clean energy marketing",
-      "po_status": "partial",
-      "total_po_amount": 180000,
-      "paid_po_amount": 90000,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 2,
-      "client_info": "Airtel 5G Plus Launch",
-      "start_date": "2026-08-15",
-      "end_date": "2026-11-15",
-      "hoarding_id": 1,
-      "internal_notes": "Visible display priority",
-      "po_status": "partial",
-      "total_po_amount": 240000,
-      "paid_po_amount": 80000,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 10,
-      "client_info": "Apollo Hospitals Healthcare Checkup",
-      "start_date": "2026-08-12",
-      "end_date": "2026-09-25",
-      "hoarding_id": 1,
-      "internal_notes": "Medical checkup packages promotion",
-      "po_status": "none",
-      "total_po_amount": 0,
-      "paid_po_amount": 0,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 3,
-      "client_info": "Joyalukkas Onam Festive Sale",
-      "start_date": "2026-08-10",
-      "end_date": "2026-09-20",
-      "hoarding_id": 1,
-      "internal_notes": "Festive banners",
-      "po_status": "pending",
-      "total_po_amount": 90000,
-      "paid_po_amount": 0,
-      "created_at": "2026-08-21T12:00:29.505Z"
-    },
-    {
-      "id": 8,
-      "client_info": "Preethi Zodiac Mixer Grinder",
-      "start_date": "2026-08-05",
-      "end_date": "2026-09-05",
-      "hoarding_id": 1,
-      "internal_notes": "Kitchen appliances promotion",
-      "po_status": "paid",
-      "total_po_amount": 85000,
-      "paid_po_amount": 85000,
-      "created_at": "2026-08-21T12:00:29.505Z"
     },
     {
       "id": 14,
@@ -3454,6 +3370,18 @@
       "total_po_amount": 0,
       "paid_po_amount": 0,
       "created_at": "2026-09-01T13:00:00.000Z"
+    },
+    {
+      "id": 18,
+      "client_info": "test tow ",
+      "start_date": "2026-10-15",
+      "end_date": "2026-11-15",
+      "hoarding_id": 178,
+      "internal_notes": "",
+      "po_status": "none",
+      "total_po_amount": 0,
+      "paid_po_amount": 0,
+      "created_at": "2026-10-15T04:38:53.957Z"
     }
   ],
   "purchase_orders": [
@@ -3473,23 +3401,6 @@
       "due_date": "2026-08-15",
       "created_at": "2026-08-21T12:00:29.502Z",
       "updated_at": "2026-08-21T12:00:29.502Z"
-    },
-    {
-      "id": "po-2",
-      "campaign_id": 2,
-      "hoarding_id": 1,
-      "po_number": "PO-AIRTEL-2026-015",
-      "po_date": "2026-08-15",
-      "vendor_name": "Bharti Airtel Ltd",
-      "description": "5G Launch on Kalavasal Junction",
-      "total_amount": 240000,
-      "paid_amount": 80000,
-      "balance_amount": 160000,
-      "status": "partial",
-      "payment_terms": "Net 30",
-      "due_date": "2026-09-15",
-      "created_at": "2026-08-21T12:00:29.505Z",
-      "updated_at": "2026-08-21T12:00:29.505Z"
     }
   ],
   "ledger": [
@@ -3506,20 +3417,6 @@
       "transaction_type": "po_payment",
       "reference_number": "TXN10293021",
       "created_at": "2026-08-21T12:00:29.502Z"
-    },
-    {
-      "id": "ledger-2",
-      "hoarding_id": 1,
-      "campaign_id": 2,
-      "po_id": "po-2",
-      "amount_paid": 80000,
-      "payment_date": "2026-08-20",
-      "period_covered": "First Month Advance",
-      "payment_method": "UPI",
-      "receipt_url": null,
-      "transaction_type": "po_payment",
-      "reference_number": "TXN992019",
-      "created_at": "2026-08-21T12:00:29.505Z"
     }
   ],
   "flex_printing": [
@@ -3544,28 +3441,6 @@
       "payment_status": "paid",
       "created_at": "2026-08-21T12:00:29.502Z",
       "updated_at": "2026-08-21T12:00:29.502Z"
-    },
-    {
-      "id": 2,
-      "campaign_id": 2,
-      "hoarding_id": 1,
-      "printing_type": "outsource",
-      "flex_size": "40x25 ft",
-      "quantity": 1,
-      "notes": "Glossy print",
-      "status": "in_progress",
-      "vendor_name": "Bright Flex Printers",
-      "vendor_contact": "9843210928",
-      "assignment_date": "2026-08-16",
-      "expected_completion": "2026-08-20",
-      "outsource_status": "in_progress",
-      "outsource_cost": 8500,
-      "material_cost": 0,
-      "labor_cost": 0,
-      "total_cost": 0,
-      "payment_status": "pending",
-      "created_at": "2026-08-21T12:00:29.505Z",
-      "updated_at": "2026-08-21T12:00:29.505Z"
     }
   ]
 }

@@ -4,12 +4,26 @@ import fs from "fs";
 
 // ─── Database Setup (GitHub API & Single Local JSON File: data/db.json) ───────
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
+const TMP_DB_PATH = path.join("/tmp", "admanager_db.json");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || "hariishwaran";
 const GITHUB_REPO = process.env.GITHUB_REPO || "ss-Agency";
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "main";
 const GITHUB_FILE_PATH = "data/db.json";
+
+function getGithubAuthHeader(): string | undefined {
+  if (!GITHUB_TOKEN) return undefined;
+  const token = GITHUB_TOKEN.trim();
+  if (token.startsWith("ghp_") || token.startsWith("github_pat_") || token.startsWith("gho_")) {
+    return `Bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+
+let lastGithubSync: { status: string; timestamp?: string; error?: string } = {
+  status: GITHUB_TOKEN ? "ready" : "no_token_configured",
+};
 
 interface DatabaseState {
   users?: any[];
@@ -37,6 +51,7 @@ const asyncHandler =
     fn(req, res, next).catch(next);
 
 async function loadDb(forceReload = false): Promise<DatabaseState> {
+  // If memory cache is present and we're not explicitly forcing a reload, reuse it
   if (dbCache && !forceReload) {
     return dbCache;
   }
@@ -45,10 +60,12 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
   if (GITHUB_TOKEN) {
     try {
       const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}&t=${Date.now()}`;
+      const authHeader = getGithubAuthHeader();
       const res = await fetch(url, {
         headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
+          ...(authHeader ? { Authorization: authHeader } : {}),
           Accept: "application/vnd.github.v3+json",
+          "User-Agent": "AdManager-Executive-Suite/1.0",
           "Cache-Control": "no-cache",
         },
       });
@@ -58,17 +75,52 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
         dbCache = JSON.parse(decoded);
         syncGlobalsFromCache();
         console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub REST API`);
+        try { fs.writeFileSync(TMP_DB_PATH, decoded, "utf-8"); } catch (_) {}
         return dbCache!;
+      } else {
+        const errText = await res.text();
+        console.warn(`GitHub API load response (${res.status}): ${errText}`);
       }
     } catch (err: any) {
       console.warn("GitHub API load warning:", err.message);
     }
   }
 
-  // 2. Try raw GitHub public file URL as fallback
+  // 2. Try /tmp/admanager_db.json (warm serverless container cache)
+  try {
+    if (fs.existsSync(TMP_DB_PATH)) {
+      const content = fs.readFileSync(TMP_DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      syncGlobalsFromCache();
+      console.log(`✅ Loaded ${campaigns.length} campaigns from /tmp database`);
+      return dbCache!;
+    }
+  } catch (err: any) {
+    console.warn("Could not read from /tmp:", err.message);
+  }
+
+  // 3. Fallback: local disk file data/db.json (bundled with repository)
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const content = fs.readFileSync(DB_PATH, "utf-8");
+      dbCache = JSON.parse(content);
+      syncGlobalsFromCache();
+      console.log(`✅ Loaded ${campaigns.length} campaigns from local disk data/db.json`);
+      return dbCache!;
+    }
+  } catch (err: any) {
+    console.error("Error loading db from local file:", err.message);
+  }
+
+  // 4. Fallback: raw GitHub public file URL as last resort
   try {
     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE_PATH}?t=${Date.now()}`;
-    const rawRes = await fetch(rawUrl, { headers: { "Cache-Control": "no-cache" } });
+    const rawRes = await fetch(rawUrl, {
+      headers: {
+        "User-Agent": "AdManager-Executive-Suite/1.0",
+        "Cache-Control": "no-cache",
+      },
+    });
     if (rawRes.ok) {
       const content = await rawRes.text();
       dbCache = JSON.parse(content);
@@ -78,18 +130,6 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
     }
   } catch (err: any) {
     console.warn("Raw GitHub URL load warning:", err.message);
-  }
-
-  // 3. Fallback: local disk file data/db.json
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const content = fs.readFileSync(DB_PATH, "utf-8");
-      dbCache = JSON.parse(content);
-      syncGlobalsFromCache();
-      return dbCache!;
-    }
-  } catch (err: any) {
-    console.error("Error loading db from local file:", err.message);
   }
 
   if (!dbCache) {
@@ -125,25 +165,35 @@ async function saveDb(): Promise<void> {
 
   const jsonString = JSON.stringify(dbCache, null, 2);
 
-  // 1. Save to local disk if directory is writable
+  // 1. Save to /tmp (always writable in serverless environments like Vercel)
+  try {
+    fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
+    console.log(`✅ Saved ${campaigns.length} campaigns to /tmp/admanager_db.json`);
+  } catch (err: any) {
+    // Non-fatal on systems where /tmp is restricted
+  }
+
+  // 2. Save to local disk if directory is writable (local development)
   try {
     const dir = path.dirname(DB_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
     console.log(`✅ Saved ${campaigns.length} campaigns to data/db.json`);
   } catch (err: any) {
-    // Ephemeral disk write notice
+    // Expected on read-only serverless filesystems
   }
 
-  // 2. Commit directly to GitHub API (AWAITED to guarantee cross-instance Vercel persistence)
+  // 3. Commit directly to GitHub API (AWAITED to guarantee cross-instance persistence)
   if (GITHUB_TOKEN) {
     try {
       console.log("Saving updated database to GitHub API...");
       const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+      const authHeader = getGithubAuthHeader();
       const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}&t=${Date.now()}`, {
         headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
+          ...(authHeader ? { Authorization: authHeader } : {}),
           Accept: "application/vnd.github.v3+json",
+          "User-Agent": "AdManager-Executive-Suite/1.0",
           "Cache-Control": "no-cache",
         },
       });
@@ -157,8 +207,9 @@ async function saveDb(): Promise<void> {
       const putRes = await fetch(url, {
         method: "PUT",
         headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
+          ...(authHeader ? { Authorization: authHeader } : {}),
           Accept: "application/vnd.github.v3+json",
+          "User-Agent": "AdManager-Executive-Suite/1.0",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -170,14 +221,19 @@ async function saveDb(): Promise<void> {
       });
 
       if (putRes.ok) {
+        lastGithubSync = { status: "success", timestamp: new Date().toISOString() };
         console.log("✅ Database committed successfully to GitHub API");
       } else {
         const errDetail = await putRes.text();
+        lastGithubSync = { status: "error", timestamp: new Date().toISOString(), error: `Status ${putRes.status}: ${errDetail}` };
         console.warn(`GitHub API commit response (${putRes.status}): ${errDetail}`);
       }
     } catch (err: any) {
+      lastGithubSync = { status: "error", timestamp: new Date().toISOString(), error: err.message };
       console.error("Error committing database to GitHub:", err.message);
     }
+  } else {
+    lastGithubSync = { status: "no_token_configured", timestamp: new Date().toISOString(), error: "GITHUB_TOKEN env variable not set" };
   }
 }
 
@@ -193,7 +249,9 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
 }
 
 async function initDbState() {
-  await loadDb(Boolean(process.env.VERCEL));
+  if (!dbCache) {
+    await loadDb();
+  }
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -799,9 +857,42 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
     res.json({ ok: true });
   }));
 
-  // ── Health ────────────────────────────────────────────────────────────────
+  // ── Health & Diagnostics ──────────────────────────────────────────────────
   app.get("/api/health", asyncHandler(async (_req, res) => {
-    res.json({ status: "ok", db: "json-file" });
+    res.json({
+      status: "ok",
+      db: GITHUB_TOKEN ? "github" : "local-file",
+      vercel: Boolean(process.env.VERCEL),
+      github: {
+        configured: Boolean(GITHUB_TOKEN),
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        branch: GITHUB_BRANCH,
+        lastSync: lastGithubSync,
+      },
+      counts: {
+        campaigns: campaigns.length,
+        hoardings: hoardings.length,
+        owners: owners.length,
+        purchase_orders: purchase_orders.length,
+        ledger: ledger.length,
+        flex_printing: flex_printing.length,
+      },
+    });
+  }));
+
+  // Force reload database (admin only)
+  app.post("/api/admin/reload-db", requireAuth, asyncHandler(async (_req, res) => {
+    await loadDb(true);
+    res.json({
+      ok: true,
+      message: "Database reloaded from authoritative source",
+      counts: {
+        campaigns: campaigns.length,
+        hoardings: hoardings.length,
+        owners: owners.length,
+      },
+    });
   }));
 
   // Serve location images
