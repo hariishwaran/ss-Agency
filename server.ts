@@ -1,10 +1,31 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
+import pg from "pg";
 
-// ─── Database Setup (GitHub API & Single Local JSON File: data/db.json) ───────
+const { Pool } = pg;
+
+// ─── Database Setup (Neon PostgreSQL Primary + Local /tmp & File Fallback) ───
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
 const TMP_DB_PATH = path.join("/tmp", "admanager_db.json");
+
+const NEON_DATABASE_URL =
+  process.env.DATABASE_URL ||
+  "postgresql://neondb_owner:npg_ETNb9slRY6WA@ep-billowing-sound-aydq8obx-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+let dbPool: pg.Pool | null = null;
+try {
+  dbPool = new Pool({
+    connectionString: NEON_DATABASE_URL,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 8000,
+    ssl: { rejectUnauthorized: false }
+  });
+  console.log("🐘 Neon PostgreSQL connection pool initialized");
+} catch (err: any) {
+  console.warn("Could not create PostgreSQL pool:", err.message);
+}
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER || "hariishwaran";
@@ -44,6 +65,7 @@ let ledger: any[] = [];
 let flex_printing: any[] = [];
 
 let dbCache: DatabaseState | null = null;
+let lastDbVersion: string | null = null;
 
 const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
@@ -51,12 +73,34 @@ const asyncHandler =
     fn(req, res, next).catch(next);
 
 async function loadDb(forceReload = false): Promise<DatabaseState> {
-  // If memory cache is present and we're not explicitly forcing a reload, reuse it
+  // 1. Primary: Load shared persistent state from Neon PostgreSQL
+  if (dbPool) {
+    try {
+      const res = await dbPool.query(
+        "SELECT data, version FROM app_state WHERE key = 'production' LIMIT 1"
+      );
+      if (res.rows.length > 0) {
+        const row = res.rows[0];
+        const newVersion = String(row.version);
+        if (!dbCache || forceReload || newVersion !== lastDbVersion) {
+          dbCache = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+          lastDbVersion = newVersion;
+          syncGlobalsFromCache();
+          console.log(`✅ Loaded ${campaigns.length} campaigns from Neon PostgreSQL (v${newVersion})`);
+        }
+        return dbCache!;
+      }
+    } catch (err: any) {
+      console.warn("Neon PostgreSQL load warning:", err.message);
+    }
+  }
+
+  // If memory cache is present and not explicitly forcing reload, reuse it
   if (dbCache && !forceReload) {
     return dbCache;
   }
 
-  // 1. If GITHUB_TOKEN is available, load authoritative dataset from GitHub REST API
+  // 2. Fallback: GitHub REST API if GITHUB_TOKEN is available
   if (GITHUB_TOKEN) {
     try {
       const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}&t=${Date.now()}`;
@@ -77,16 +121,13 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
         console.log(`✅ Loaded ${campaigns.length} campaigns from GitHub REST API`);
         try { fs.writeFileSync(TMP_DB_PATH, decoded, "utf-8"); } catch (_) {}
         return dbCache!;
-      } else {
-        const errText = await res.text();
-        console.warn(`GitHub API load response (${res.status}): ${errText}`);
       }
     } catch (err: any) {
       console.warn("GitHub API load warning:", err.message);
     }
   }
 
-  // 2. Try /tmp/admanager_db.json (warm serverless container cache)
+  // 3. Fallback: /tmp/admanager_db.json
   try {
     if (fs.existsSync(TMP_DB_PATH)) {
       const content = fs.readFileSync(TMP_DB_PATH, "utf-8");
@@ -99,7 +140,7 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
     console.warn("Could not read from /tmp:", err.message);
   }
 
-  // 3. Fallback: local disk file data/db.json (bundled with repository)
+  // 4. Fallback: local disk file data/db.json
   try {
     if (fs.existsSync(DB_PATH)) {
       const content = fs.readFileSync(DB_PATH, "utf-8");
@@ -112,7 +153,7 @@ async function loadDb(forceReload = false): Promise<DatabaseState> {
     console.error("Error loading db from local file:", err.message);
   }
 
-  // 4. Fallback: raw GitHub public file URL as last resort
+  // 5. Fallback: raw GitHub public file URL
   try {
     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE_PATH}?t=${Date.now()}`;
     const rawRes = await fetch(rawUrl, {
@@ -165,28 +206,42 @@ async function saveDb(): Promise<void> {
 
   const jsonString = JSON.stringify(dbCache, null, 2);
 
-  // 1. Save to /tmp (always writable in serverless environments like Vercel)
-  try {
-    fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
-    console.log(`✅ Saved ${campaigns.length} campaigns to /tmp/admanager_db.json`);
-  } catch (err: any) {
-    // Non-fatal on systems where /tmp is restricted
+  // 1. Primary: Save directly to shared Neon PostgreSQL database
+  if (dbPool) {
+    try {
+      const res = await dbPool.query(`
+        INSERT INTO app_state (key, data, version, updated_at)
+        VALUES ('production', $1::jsonb, 1, NOW())
+        ON CONFLICT (key) DO UPDATE SET 
+          data = EXCLUDED.data, 
+          version = app_state.version + 1, 
+          updated_at = NOW()
+        RETURNING version;
+      `, [jsonString]);
+      if (res.rows.length > 0) {
+        lastDbVersion = String(res.rows[0].version);
+      }
+      console.log(`✅ Saved ${campaigns.length} campaigns to Neon PostgreSQL (v${lastDbVersion})`);
+    } catch (err: any) {
+      console.error("Neon PostgreSQL save error:", err.message);
+    }
   }
 
-  // 2. Save to local disk if directory is writable (local development)
+  // 2. Save to /tmp
+  try {
+    fs.writeFileSync(TMP_DB_PATH, jsonString, "utf-8");
+  } catch (_) {}
+
+  // 3. Save to local disk if directory is writable
   try {
     const dir = path.dirname(DB_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(DB_PATH, jsonString, "utf-8");
-    console.log(`✅ Saved ${campaigns.length} campaigns to data/db.json`);
-  } catch (err: any) {
-    // Expected on read-only serverless filesystems
-  }
+  } catch (_) {}
 
-  // 3. Commit directly to GitHub API (AWAITED to guarantee cross-instance persistence)
+  // 4. Commit to GitHub API if token available
   if (GITHUB_TOKEN) {
     try {
-      console.log("Saving updated database to GitHub API...");
       const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
       const authHeader = getGithubAuthHeader();
       const getFileRes = await fetch(`${url}?ref=${GITHUB_BRANCH}&t=${Date.now()}`, {
@@ -222,18 +277,8 @@ async function saveDb(): Promise<void> {
 
       if (putRes.ok) {
         lastGithubSync = { status: "success", timestamp: new Date().toISOString() };
-        console.log("✅ Database committed successfully to GitHub API");
-      } else {
-        const errDetail = await putRes.text();
-        lastGithubSync = { status: "error", timestamp: new Date().toISOString(), error: `Status ${putRes.status}: ${errDetail}` };
-        console.warn(`GitHub API commit response (${putRes.status}): ${errDetail}`);
       }
-    } catch (err: any) {
-      lastGithubSync = { status: "error", timestamp: new Date().toISOString(), error: err.message };
-      console.error("Error committing database to GitHub:", err.message);
-    }
-  } else {
-    lastGithubSync = { status: "no_token_configured", timestamp: new Date().toISOString(), error: "GITHUB_TOKEN env variable not set" };
+    } catch (_) {}
   }
 }
 
@@ -249,9 +294,7 @@ function isMatch(recordId: any, targetIdNum: number, targetIdStr: string): boole
 }
 
 async function initDbState() {
-  if (!dbCache) {
-    await loadDb();
-  }
+  await loadDb();
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -859,9 +902,25 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   // ── Health & Diagnostics ──────────────────────────────────────────────────
   app.get("/api/health", asyncHandler(async (_req, res) => {
+    let neonConnected = false;
+    let neonVersion: string | null = null;
+    if (dbPool) {
+      try {
+        const testRes = await dbPool.query("SELECT version, updated_at FROM app_state WHERE key = 'production';");
+        if (testRes.rows.length > 0) {
+          neonConnected = true;
+          neonVersion = String(testRes.rows[0].version);
+        }
+      } catch (_) {}
+    }
+
     res.json({
       status: "ok",
-      db: GITHUB_TOKEN ? "github" : "local-file",
+      db: neonConnected ? "neon-postgresql" : (GITHUB_TOKEN ? "github" : "local-file"),
+      neon: {
+        connected: neonConnected,
+        version: neonVersion,
+      },
       vercel: Boolean(process.env.VERCEL),
       github: {
         configured: Boolean(GITHUB_TOKEN),
