@@ -22,6 +22,9 @@ try {
     connectionTimeoutMillis: 8000,
     ssl: { rejectUnauthorized: false }
   });
+  dbPool.on("error", (err: any) => {
+    console.warn("⚠️ Non-fatal idle PostgreSQL client error:", err.message);
+  });
   console.log("🐘 Neon PostgreSQL connection pool initialized");
 } catch (err: any) {
   console.warn("Could not create PostgreSQL pool:", err.message);
